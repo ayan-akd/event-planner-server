@@ -18,6 +18,13 @@ router.patch(
   UserController.updateUser
 );
 
+router.patch(
+  "/change-status/:id",
+  auth(UserRole.ADMIN),
+  validateRequest(UserValidation.changeStatusZodSchema),
+  UserController.changeUserStatus
+);
+
 router.delete("/:id", auth(UserRole.ADMIN), UserController.deleteUser);
 
 export const UserRoutes = router;

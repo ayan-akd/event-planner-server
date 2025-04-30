@@ -8,6 +8,15 @@ const updateUserZodSchema = z.object({
   }),
 });
 
+const changeStatusZodSchema = z.object({
+  body: z.object({
+    status: z.enum(["ACTIVE", "BLOCKED"] as [string, ...string[]], {
+      required_error: "status is required",
+    }),
+  }),
+});
+
 export const UserValidation = {
   updateUserZodSchema,
+  changeStatusZodSchema,
 };

@@ -1,7 +1,7 @@
-
 import prisma from "../../../shared/prisma";
 import httpStatus from "http-status";
 import { AppError } from "../../errors/AppError";
+import { UserStatus } from "@prisma/client";
 
 const getAllUsersFromDB = async () => {
   const result = await prisma.user.findMany({
@@ -16,7 +16,7 @@ const getAllUsersFromDB = async () => {
       createdAt: true,
       updatedAt: true,
       isDeleted: true,
-    }
+    },
   });
   return result;
 };
@@ -37,14 +37,13 @@ const getSingleUserFromDB = async (id: string) => {
       createdAt: true,
       updatedAt: true,
       isDeleted: true,
-    }
+    },
   });
   if (!result) {
     throw new AppError(httpStatus.NOT_FOUND, "user not found");
   }
   return result;
 };
-
 
 const updateUserIntoDB = async (id: string, data: any) => {
   const isExist = await prisma.user.findUnique({
@@ -97,9 +96,31 @@ const deleteUserFromDB = async (id: string) => {
   return result;
 };
 
+const changeUserStatus = async (id: string, status: UserStatus) => {
+  const isExist = await prisma.user.findUnique({
+    where: {
+      id,
+    },
+  });
+  console.log(isExist);
+  if (!isExist) {
+    throw new AppError(httpStatus.NOT_FOUND, "user not found");
+  }
+  const result = await prisma.user.update({
+    where: {
+      id,
+    },
+    data: {
+      status
+    },
+  });
+  return result;
+};
+
 export const UserService = {
   getAllUsersFromDB,
   getSingleUserFromDB,
   updateUserIntoDB,
   deleteUserFromDB,
+  changeUserStatus,
 };
