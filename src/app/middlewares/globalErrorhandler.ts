@@ -14,16 +14,25 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
   let message = "Something went wrong!";
   let errorSources: TErrorSources = [
     {
-      path: '',
-      message: 'Something went wrong',
+      path: "",
+      message: "Something went wrong",
     },
   ];
 
   if (err instanceof ZodError) {
     const simplifiedError = handleZodError(err);
     statusCode = simplifiedError?.statusCode;
-    message = simplifiedError?.message;
-    errorSources = simplifiedError?.errorSources || [];
+    message =
+      simplifiedError?.message +
+      " | " +
+      (simplifiedError?.errorSources?.[0]?.message || "");
+    res.status(statusCode).json({
+      success: false,
+      statusCode,
+      message,
+      stack: process.env.NODE_ENV === "development" ? err?.stack : null,
+    });
+    return;
   }
 
   if (err instanceof AppError) {
@@ -110,5 +119,4 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
     stack: process.env.NODE_ENV === "development" ? err?.stack : null,
   });
 };
-
 export default globalErrorHandler;
