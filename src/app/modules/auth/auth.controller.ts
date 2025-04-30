@@ -34,6 +34,20 @@ const logInController = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const refreshTokenController = catchAsync(async (req: Request, res: Response) => {
+    const { refreshToken } = req.cookies;
+    const result = await AuthService.refreshToken(refreshToken);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Access token generated successfully!",
+        data: result
+    })
+});
+
+
+
+
 const changePasswordController = catchAsync(
   async (req: Request & { user?: TUserFromToken }, res: Response) => {
     if (!req.user?.userId) {
@@ -55,4 +69,5 @@ export const AuthController = {
   signUpController,
   logInController,
   changePasswordController,
+  refreshTokenController,
 };

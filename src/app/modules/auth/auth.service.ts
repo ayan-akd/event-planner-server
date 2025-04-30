@@ -4,6 +4,8 @@ import prisma from "../../../shared/prisma";
 import { Request } from "express";
 import { jwtHelpers } from "../../../utils/jwtHelpers";
 import config from "../../../config";
+import { Secret } from "jsonwebtoken";
+
 const signUp = async (req: Request): Promise<User> => {
   const hashedPassword: string = await bcrypt.hash(req.body.password, 12);
   const data = {
@@ -61,6 +63,38 @@ const logIn = async (payload: { email: string; password: string }) => {
   };
 };
 
+const refreshToken = async (token: string) => {
+    let decodedData;
+    try {
+        decodedData = jwtHelpers.verifyToken(token, config.jwt.refresh_token_secret as Secret);
+    }
+    catch (err) {
+        throw new Error("You are not authorized!")
+    }
+
+    const userData = await prisma.user.findUniqueOrThrow({
+        where: {
+            email: decodedData.email,
+            status: UserStatus.ACTIVE
+        }
+    });
+
+    const accessToken = jwtHelpers.generateToken({
+        userId: userData.id,
+        email: userData.email,
+        role: userData.role
+    },
+        config.jwt.jwt_secret as Secret,
+        config.jwt.jwt_expires_in as string
+    );
+
+    return {
+        accessToken,
+    };
+
+};
+
+
 const changePassword = async (
   userId: string,
   payload: {
@@ -100,4 +134,5 @@ export const AuthService = {
   signUp,
   logIn,
   changePassword,
+  refreshToken,
 };
