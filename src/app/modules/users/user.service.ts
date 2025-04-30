@@ -97,15 +97,17 @@ const deleteUserFromDB = async (id: string) => {
 };
 
 const changeUserStatus = async (id: string, status: UserStatus) => {
+
   const isExist = await prisma.user.findUnique({
     where: {
       id,
     },
   });
-  console.log(isExist);
+
   if (!isExist) {
     throw new AppError(httpStatus.NOT_FOUND, "user not found");
   }
+  
   const result = await prisma.user.update({
     where: {
       id,
