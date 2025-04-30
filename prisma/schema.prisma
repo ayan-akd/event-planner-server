@@ -20,8 +20,85 @@ model User {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
   isDeleted    Boolean    @default(false)
+  events       Event[]
+  participants Participant[]
+  receivedInvitations Invitation[] @relation("InvitationToParticipant")
+  sentInvitations     Invitation[] @relation("Inviter")
+  reviews Review[]
 
   @@map("users")
+}
+
+model Event {
+  id          String     @id @default(uuid())
+  title       String
+  image       String
+  description String
+  type        EventType
+  fee         Int
+  date        DateTime
+  isPublic    Boolean @default(true)
+  venueOrLink String
+  isDeleted   Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  organizerId String
+  organizer   User       @relation(fields: [organizerId], references: [id])
+  participants Participant[]
+  invitations Invitation[]
+  reviews Review[]
+  
+  @@map("events")
+}
+
+model Participant {
+  id        String @id @default(uuid())
+  eventId String
+  event  Event @relation(fields: [eventId], references: [id])
+  userId    String
+  user      User   @relation(fields: [userId], references: [id])
+  status    ParticipantStatus @default(PENDING)
+  hasPaid   Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean @default(false)
+  inviteId   String?
+
+  @@map("participants")
+}
+
+model Invitation {
+  id        String @id @default(uuid())
+  participantId    String
+  eventId String
+  status    InvitationStatus @default(PENDING)
+  inviterId String
+  hasRead    Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean @default(false)
+
+
+  user      User   @relation("InvitationToParticipant", fields: [participantId], references: [id])
+  event  Event @relation(fields: [eventId], references: [id])
+  inviter   User   @relation("Inviter",fields: [inviterId], references: [id])
+
+  @@map("invitations")
+}
+
+model Review {
+  id        String @id @default(uuid())
+  userId    String
+  eventId String
+  rating    Int
+  comment   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean @default(false)
+  user      User   @relation(fields: [userId], references: [id])
+  event  Event @relation(fields: [eventId], references: [id])
+
+  @@map("reviews")
 }
 
 enum UserRole {
@@ -32,4 +109,22 @@ enum UserRole {
 enum UserStatus {
   ACTIVE
   BLOCKED
+}
+
+enum EventType {
+  OFFLINE
+  ONLINE
+}
+
+enum ParticipantStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  BANNED
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
 }
