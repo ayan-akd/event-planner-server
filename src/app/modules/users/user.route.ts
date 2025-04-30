@@ -1,22 +1,23 @@
 import { Router } from "express";
 import { UserController } from "./user.controller";
+import auth from "../../middlewares/auth";
+import { UserRole } from "@prisma/client";
 import validateRequest from "../../middlewares/validateRequest";
 import { UserValidation } from "./user.validation";
 
 const router = Router();
 
-router.get("/", UserController.getAllUsers);
+router.get("/", auth(UserRole.ADMIN), UserController.getAllUsers);
 
 router.get("/:id", UserController.getSingleUser);
 
-router.post(
-  "/",
-  validateRequest(UserValidation.createUserZodSchema),
-  UserController.createUser
+router.patch(
+  "/:id",
+  auth(UserRole.ADMIN, UserRole.USER),
+  validateRequest(UserValidation.updateUserZodSchema),
+  UserController.updateUser
 );
 
-router.put("/:id", UserController.updateUser);
-
-router.delete("/:id", UserController.deleteUser);
+router.delete("/:id", auth(UserRole.ADMIN), UserController.deleteUser);
 
 export const UserRoutes = router;

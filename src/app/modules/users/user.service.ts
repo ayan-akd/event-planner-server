@@ -2,12 +2,22 @@
 import prisma from "../../../shared/prisma";
 import httpStatus from "http-status";
 import { AppError } from "../../errors/AppError";
-import { Request } from "express";
-import { User } from "@prisma/client";
-import * as bcrypt from 'bcrypt'
 
 const getAllUsersFromDB = async () => {
-  const result = await prisma.user.findMany();
+  const result = await prisma.user.findMany({
+    select: {
+      id: true,
+      name: true,
+      username: true,
+      email: true,
+      profileImage: true,
+      role: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+      isDeleted: true,
+    }
+  });
   return result;
 };
 
@@ -16,6 +26,18 @@ const getSingleUserFromDB = async (id: string) => {
     where: {
       id,
     },
+    select: {
+      id: true,
+      name: true,
+      username: true,
+      email: true,
+      profileImage: true,
+      role: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+      isDeleted: true,
+    }
   });
   if (!result) {
     throw new AppError(httpStatus.NOT_FOUND, "user not found");
@@ -23,17 +45,6 @@ const getSingleUserFromDB = async (id: string) => {
   return result;
 };
 
-const createUserIntoDB = async (req: Request): Promise<User> => {
-  const hashedPassword: string = await bcrypt.hash(req.body.password, 12)
-  const data = {
-    ...req.body,
-    password: hashedPassword
-  }
-  const result = await prisma.user.create({
-    data,
-  });
-  return result;
-};
 
 const updateUserIntoDB = async (id: string, data: any) => {
   const isExist = await prisma.user.findUnique({
@@ -49,6 +60,18 @@ const updateUserIntoDB = async (id: string, data: any) => {
   const result = await prisma.user.update({
     where: {
       id,
+    },
+    select: {
+      id: true,
+      name: true,
+      username: true,
+      email: true,
+      profileImage: true,
+      role: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+      isDeleted: true,
     },
     data,
   });
@@ -77,7 +100,6 @@ const deleteUserFromDB = async (id: string) => {
 export const UserService = {
   getAllUsersFromDB,
   getSingleUserFromDB,
-  createUserIntoDB,
   updateUserIntoDB,
   deleteUserFromDB,
 };

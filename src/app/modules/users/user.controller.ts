@@ -25,15 +25,7 @@ const getSingleUser = catchAsync(
     });
   }
 );
-const createUser = catchAsync(async (req: Request, res: Response) => {
-  const result = await UserService.createUserIntoDB(req);
-  sendResponse(res, {
-    statusCode: httpStatus.CREATED,
-    success: true,
-    message: "User created successfully",
-    data: result,
-  });
-});
+
 
 const updateUser = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
@@ -60,7 +52,6 @@ const deleteUser = catchAsync(async (req: Request, res: Response) => {
 export const UserController = {
   getAllUsers,
   getSingleUser,
-  createUser,
   updateUser,
   deleteUser,
 };

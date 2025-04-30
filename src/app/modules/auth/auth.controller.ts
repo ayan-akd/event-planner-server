@@ -4,6 +4,7 @@ import { AuthService } from "./auth.service";
 import sendResponse from "../../../utils/sendResponse";
 import httpStatus from "http-status";
 import config from "../../../config";
+import { TUserFromToken } from "../users/user.interface";
 
 const signUpController = catchAsync(async (req: Request, res: Response) => {
   const result = await AuthService.signUp(req);
@@ -33,7 +34,25 @@ const logInController = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const changePasswordController = catchAsync(
+  async (req: Request & { user?: TUserFromToken }, res: Response) => {
+    if (!req.user?.userId) {
+      throw new Error('User ID is required');
+    }
+    const result = await AuthService.changePassword(
+      req.user.userId,
+      req.body
+    );
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Password changed successfully",
+      data: result,
+    });
+  });
+
 export const AuthController = {
   signUpController,
   logInController,
+  changePasswordController,
 };
