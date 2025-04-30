@@ -1,0 +1,67 @@
+import { User, UserStatus } from "@prisma/client";
+import * as bcrypt from "bcrypt";
+import prisma from "../../../shared/prisma";
+import { Request } from "express";
+import { jwtHelpers } from "../../../utils/jwtHelpers";
+import config from "../../../config";
+const signUp = async (req: Request): Promise<User> => {
+  const hashedPassword: string = await bcrypt.hash(req.body.password, 12);
+  const data = {
+    ...req.body,
+    password: hashedPassword,
+  };
+  const result = await prisma.user.create({
+    data,
+  });
+  return result;
+};
+
+const logIn = async (payload: { email: string; password: string }) => {
+  const { email, password } = payload;
+  const isUserExist = await prisma.user.findUnique({
+    where: {
+      email,
+      status: UserStatus.ACTIVE,
+      isDeleted: false,
+    },
+  });
+  if (!isUserExist) {
+    throw new Error("User does not exist");
+  }
+  const isPasswordMatched = await bcrypt.compare(
+    password,
+    isUserExist.password
+  );
+  if (!isPasswordMatched) {
+    throw new Error("Password is incorrect");
+  }
+
+  const accessToken = jwtHelpers.generateToken(
+    {
+      userId: isUserExist.id,
+      email: isUserExist.email,
+      role: isUserExist.role,
+    },
+    config.jwt.jwt_secret as string,
+    config.jwt.jwt_expires_in as string
+  );
+  const refreshToken = jwtHelpers.generateToken(
+    {
+      userId: isUserExist.id,
+      email: isUserExist.email,
+      role: isUserExist.role,
+    },
+    config.jwt.refresh_token_secret as string,
+    config.jwt.refresh_token_expires_in as string
+  );
+
+  return {
+    accessToken,
+    refreshToken,
+  };
+};
+
+export const AuthService = {
+  signUp,
+  logIn,
+};
