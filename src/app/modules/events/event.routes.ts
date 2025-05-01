@@ -37,5 +37,12 @@ eventRouter.delete(
   EventController.hardDeleteEvent
 );
 
+// Soft Delete Single Event Route
+eventRouter.delete(
+  "/:eventId/soft",
+  auth(UserRole.USER),
+  EventController.softDeleteEvent
+);
+
 // Export Route
 export const EventRoutes = eventRouter;

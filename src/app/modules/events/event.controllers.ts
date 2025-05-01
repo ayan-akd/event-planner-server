@@ -98,10 +98,33 @@ const hardDeleteEvent = catchAsync(
   }
 );
 
+/**
+ * @Description Soft Delete Event
+ * @Method DELETE
+ * @Params eventId
+ * @Return Event Data
+ */
+const softDeleteEvent = catchAsync(
+  async (req: Request & { user?: any }, res: Response) => {
+    const { eventId } = req.params;
+    const result = await EventService.softDeleteSingleEventsFromToDB(
+      eventId,
+      req.user
+    );
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Event Deleted successfully",
+      data: result,
+    });
+  }
+);
+
 export const EventController = {
   createEvent,
   getLoggedInUserEvents,
   getAllEvents,
   hardDeleteEvent,
   getSingleEvent,
+  softDeleteEvent,
 };

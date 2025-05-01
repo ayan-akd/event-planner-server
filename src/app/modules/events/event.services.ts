@@ -23,6 +23,11 @@ const getAllEventsFromToDB = async () => {
     where: {
       isDeleted: false,
     },
+    include: {
+      invitations: true,
+      participants: true,
+      reviews: true,
+    },
   });
   return result;
 };
@@ -43,6 +48,11 @@ const getLoggedInUserEventsFromToDB = async (authInfo: any) => {
       organizerId: authInfo.userId,
       isDeleted: false,
     },
+    include: {
+      invitations: true,
+      participants: true,
+      reviews: true,
+    },
   });
   return result;
 };
@@ -54,6 +64,11 @@ const getSingleEventsFromToDB = async (eventId: string) => {
     where: {
       id: eventId,
       isDeleted: false,
+    },
+    include: {
+      invitations: true,
+      participants: true,
+      reviews: true,
     },
   });
   return result;
@@ -91,10 +106,46 @@ const hardDeleteSingleEventsFromToDB = async (
   return result;
 };
 
+// Soft Delete Single Event From DB
+const softDeleteSingleEventsFromToDB = async (
+  eventId: string,
+  authInfo: any
+) => {
+  // check User
+  await prisma.user.findUniqueOrThrow({
+    where: {
+      id: authInfo.userId,
+      isDeleted: false,
+      status: UserStatus.ACTIVE,
+    },
+  });
+  //  Check  Event
+  await prisma.event.findUniqueOrThrow({
+    where: {
+      id: eventId,
+      organizerId: authInfo.userId,
+      isDeleted: false,
+    },
+  });
+
+  // Delete Event
+  const result = await prisma.event.update({
+    where: {
+      id: eventId,
+      organizerId: authInfo.userId,
+    },
+    data: {
+      isDeleted: true,
+    },
+  });
+  return result;
+};
+
 export const EventService = {
   eventSaveToDB,
   getAllEventsFromToDB,
   getLoggedInUserEventsFromToDB,
   getSingleEventsFromToDB,
   hardDeleteSingleEventsFromToDB,
+  softDeleteSingleEventsFromToDB,
 };
