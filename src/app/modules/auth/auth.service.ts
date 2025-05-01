@@ -5,6 +5,8 @@ import { Request } from "express";
 import { jwtHelpers } from "../../../utils/jwtHelpers";
 import config from "../../../config";
 import { Secret } from "jsonwebtoken";
+import { AppError } from "../../errors/AppError";
+import httpStatus from "http-status";
 
 const signUp = async (req: Request): Promise<User> => {
   const hashedPassword: string = await bcrypt.hash(req.body.password, 12);
@@ -63,37 +65,62 @@ const logIn = async (payload: { email: string; password: string }) => {
   };
 };
 
-const refreshToken = async (token: string) => {
-    let decodedData;
-    try {
-        decodedData = jwtHelpers.verifyToken(token, config.jwt.refresh_token_secret as Secret);
-    }
-    catch (err) {
-        throw new Error("You are not authorized!")
-    }
-
-    const userData = await prisma.user.findUniqueOrThrow({
-        where: {
-            email: decodedData.email,
-            status: UserStatus.ACTIVE
-        }
-    });
-
-    const accessToken = jwtHelpers.generateToken({
-        userId: userData.id,
-        email: userData.email,
-        role: userData.role
+const getMeFromDb = async (email: string) => {
+  const result = await prisma.user.findUnique({
+    where: {
+      email,
     },
-        config.jwt.jwt_secret as Secret,
-        config.jwt.jwt_expires_in as string
-    );
-
-    return {
-        accessToken,
-    };
-
+    select: {
+      id: true,
+      name: true,
+      username: true,
+      email: true,
+      profileImage: true,
+      role: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+      isDeleted: true,
+    },
+  });
+  if (!result) {
+    throw new AppError(httpStatus.NOT_FOUND, "user not found");
+  }
+  return result;
 };
 
+const refreshToken = async (token: string) => {
+  let decodedData;
+  try {
+    decodedData = jwtHelpers.verifyToken(
+      token,
+      config.jwt.refresh_token_secret as Secret
+    );
+  } catch {
+    throw new Error("You are not authorized!");
+  }
+
+  const userData = await prisma.user.findUniqueOrThrow({
+    where: {
+      email: decodedData.email,
+      status: UserStatus.ACTIVE,
+    },
+  });
+
+  const accessToken = jwtHelpers.generateToken(
+    {
+      userId: userData.id,
+      email: userData.email,
+      role: userData.role,
+    },
+    config.jwt.jwt_secret as Secret,
+    config.jwt.jwt_expires_in as string
+  );
+
+  return {
+    accessToken,
+  };
+};
 
 const changePassword = async (
   userId: string,
@@ -133,6 +160,7 @@ const changePassword = async (
 export const AuthService = {
   signUp,
   logIn,
+  getMeFromDb,
   changePassword,
   refreshToken,
 };

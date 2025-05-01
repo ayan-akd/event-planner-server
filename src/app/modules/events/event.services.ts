@@ -1,5 +1,6 @@
 import { Event, UserStatus } from "@prisma/client";
 import prisma from "../../../shared/prisma";
+import { TUserFromToken } from "../users/user.interface";
 
 // Event Save to DB
 const eventSaveToDB = async (
