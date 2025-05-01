@@ -57,8 +57,51 @@ const getAllEvents = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+/**
+ * @Description Get Single Event
+ * @Method GET
+ * @Params eventId
+ * @Return Event Data
+ */
+const getSingleEvent = catchAsync(
+  async (req: Request & { user?: any }, res: Response) => {
+    const { eventId } = req.params;
+    const result = await EventService.getSingleEventsFromToDB(eventId);
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Event Retrieved successfully",
+      data: result,
+    });
+  }
+);
+
+/**
+ * @Description Hard Delete Event
+ * @Method DELETE
+ * @Params eventId
+ * @Return Event Data
+ */
+const hardDeleteEvent = catchAsync(
+  async (req: Request & { user?: any }, res: Response) => {
+    const { eventId } = req.params;
+    const result = await EventService.hardDeleteSingleEventsFromToDB(
+      eventId,
+      req.user
+    );
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Event Deleted successfully",
+      data: result,
+    });
+  }
+);
+
 export const EventController = {
   createEvent,
   getLoggedInUserEvents,
   getAllEvents,
+  hardDeleteEvent,
+  getSingleEvent,
 };

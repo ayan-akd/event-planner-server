@@ -20,5 +20,15 @@ eventRouter.get(
   EventController.getLoggedInUserEvents
 );
 
+// Get Single Event Route
+eventRouter.get("/:eventId", EventController.getSingleEvent);
+
+// Hard Delete Single Event Route
+eventRouter.delete(
+  "/:eventId",
+  auth(UserRole.USER),
+  EventController.hardDeleteEvent
+);
+
 // Export Route
 export const EventRoutes = eventRouter;
