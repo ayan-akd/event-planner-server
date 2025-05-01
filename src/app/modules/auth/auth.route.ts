@@ -19,6 +19,12 @@ router.post(
   AuthController.logInController
 );
 
+router.get(
+  "/me",
+  auth(UserRole.USER, UserRole.ADMIN),
+  AuthController.getMeController
+);
+
 router.post("/refresh-token", AuthController.refreshTokenController);
 
 router.post(

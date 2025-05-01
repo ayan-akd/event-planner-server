@@ -3,6 +3,7 @@ import catchAsync from "../../../utils/catchAsync";
 import sendResponse from "../../../utils/sendResponse";
 import httpStatus from "http-status";
 import { UserService } from "./user.service";
+import { TUserFromToken } from "./user.interface";
 
 const getAllUsers = catchAsync(async (req: Request, res: Response) => {
   const result = await UserService.getAllUsersFromDB();
@@ -23,6 +24,7 @@ const getSingleUser = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
 
 const updateUser = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
