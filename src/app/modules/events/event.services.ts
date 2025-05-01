@@ -4,7 +4,7 @@ import { TUserFromToken } from "../users/user.interface";
 
 // Event Save to DB
 const eventSaveToDB = async (
-  authInfo: any,
+  authInfo: TUserFromToken,
   payload: Event
 ): Promise<Event | null> => {
   // Check User
@@ -23,7 +23,7 @@ const eventSaveToDB = async (
 
 // Event Update
 const eventUpdate = async (
-  authInfo: any,
+  authInfo: TUserFromToken,
   eventId: string,
   payload: Partial<Event>
 ): Promise<Event | null> => {
@@ -64,7 +64,7 @@ const getAllEventsFromToDB = async (): Promise<Event[] | []> => {
 
 // Get Logged In User Events From DB
 const getLoggedInUserEventsFromToDB = async (
-  authInfo: any
+  authInfo: TUserFromToken
 ): Promise<Event[] | []> => {
   // Check User Status
   await prisma.user.findUniqueOrThrow({
@@ -111,7 +111,7 @@ const getSingleEventsFromToDB = async (
 // Hard Delete Single Event From DB
 const hardDeleteSingleEventsFromToDB = async (
   eventId: string,
-  authInfo: any
+  authInfo: TUserFromToken
 ): Promise<Event | null> => {
   // check User
   await prisma.user.findUniqueOrThrow({
@@ -143,7 +143,7 @@ const hardDeleteSingleEventsFromToDB = async (
 // Soft Delete Single Event From DB
 const softDeleteSingleEventsFromToDB = async (
   eventId: string,
-  authInfo: any
+  authInfo: TUserFromToken
 ): Promise<Event | null> => {
   // check User
   await prisma.user.findUniqueOrThrow({

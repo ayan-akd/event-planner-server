@@ -70,7 +70,7 @@ const getAllEvents = catchAsync(async (req: Request, res: Response) => {
  * @Return Event Data
  */
 const getSingleEvent = catchAsync(
-  async (req: Request & { user?: any }, res: Response) => {
+  async (req: Request & { user?: TUserFromToken }, res: Response) => {
     const { eventId } = req.params;
     const result = await EventService.getSingleEventsFromToDB(eventId);
     sendResponse(res, {
@@ -89,8 +89,11 @@ const getSingleEvent = catchAsync(
  * @Return Event Data
  */
 const hardDeleteEvent = catchAsync(
-  async (req: Request & { user?: any }, res: Response) => {
+  async (req: Request & { user?: TUserFromToken }, res: Response) => {
     const { eventId } = req.params;
+    if (!req.user) {
+      throw new Error("User not found");
+    }
     const result = await EventService.hardDeleteSingleEventsFromToDB(
       eventId,
       req.user
@@ -111,8 +114,11 @@ const hardDeleteEvent = catchAsync(
  * @Return Event Data
  */
 const softDeleteEvent = catchAsync(
-  async (req: Request & { user?: any }, res: Response) => {
+  async (req: Request & { user?: TUserFromToken }, res: Response) => {
     const { eventId } = req.params;
+    if (!req.user) {
+      throw new Error("User not found");
+    }
     const result = await EventService.softDeleteSingleEventsFromToDB(
       eventId,
       req.user
@@ -133,8 +139,11 @@ const softDeleteEvent = catchAsync(
  * @Return Event Data
  */
 const updateSingleEvent = catchAsync(
-  async (req: Request & { user?: any }, res: Response) => {
+  async (req: Request & { user?: TUserFromToken }, res: Response) => {
     const { eventId } = req.params;
+    if (!req.user) {
+      throw new Error("User not found");
+    }
     const result = await EventService.eventUpdate(req.user, eventId, req.body);
     sendResponse(res, {
       statusCode: httpStatus.OK,
