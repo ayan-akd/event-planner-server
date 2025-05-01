@@ -71,8 +71,8 @@ model Invitation {
   id            String           @id @default(uuid())
   participantId String
   eventId       String
-  inviterId     String
   status        InvitationStatus @default(PENDING)
+  inviterId     String
   hasRead       Boolean          @default(false)
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt

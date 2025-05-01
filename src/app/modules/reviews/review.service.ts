@@ -4,7 +4,11 @@ import { AppError } from "../../errors/AppError";
 import httpStatus from "http-status";
 
 const getAllReviewsFromDB = async () => {
-  const result = await prisma.review.findMany();
+  const result = await prisma.review.findMany({
+    where: {
+      isDeleted: false,
+    },
+  });
   return result;
 };
 
@@ -12,6 +16,7 @@ const getSingleReviewFromDB = async (id: string) => {
   const result = await prisma.review.findUnique({
     where: {
       id,
+      isDeleted: false,
     },
   });
   if (!result) {

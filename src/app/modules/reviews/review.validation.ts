@@ -10,7 +10,7 @@ const createReviewZodSchema = z.object({
     }),
     rating: z.number({
       required_error: "rating is required",
-    }),
+    }).min(1, "Rating must be at least 1").max(5, "Rating must be at most 5"),
     comment: z.string({
       required_error: "comment is required",
     }),
