@@ -6,6 +6,7 @@ import { ParticipantServices } from "./participant.service";
 
 
 const createParticipant = catchAsync(async (req: Request, res: Response) => {
+  // console.log(req.body)
   const result = await ParticipantServices.createParticipantIntoDB(req.body);
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
@@ -47,9 +48,23 @@ const updateParticipant = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const deleteParticipant = catchAsync(async (req: Request, res: Response) => {
+// hard delete
+const deleteParticipant = catchAsync(async (req: Request, res: Response) => {  
   const { id } = req.params;
-  await ParticipantServices.deleteParticipantFromDB(id);
+  const result = await ParticipantServices.hardDeleteParticipantFromDB(id);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Participant deleted successfully",
+    data: result,
+  });
+});
+
+
+// soft delete
+const deleteWithUpdateParticipant = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  await ParticipantServices.softDeleteParticipantFromDB(id);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -59,9 +74,10 @@ const deleteParticipant = catchAsync(async (req: Request, res: Response) => {
 });
 
 export const ParticipantControllers = {
-    createParticipant,
+  createParticipant,
   getAllParticipants,
   getSingleParticipant,
   updateParticipant,
   deleteParticipant,
+  deleteWithUpdateParticipant,
 };

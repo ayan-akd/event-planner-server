@@ -1,7 +1,5 @@
 import { Router } from "express";
 import { ParticipantControllers } from "./participant.controller";
-// import auth from "../../middlewares/auth";
-// import { UserRole } from "@prisma/client";
 import validateRequest from "../../middlewares/validateRequest";
 import { ParticipantValidation } from "./participant.validation";
 import auth from "../../middlewares/auth";
@@ -11,7 +9,7 @@ const router = Router();
 
 router.post(
     "/create-participant",
-    auth(UserRole.USER),
+    auth(UserRole.ADMIN, UserRole.USER),
     validateRequest(ParticipantValidation.createParticipantSchema),
     ParticipantControllers.createParticipant
     );
@@ -31,8 +29,14 @@ router.patch(
   ParticipantControllers.updateParticipant
 );
 
-router.patch("/:id",
+// hard delete
+router.delete("/:id",
     auth(UserRole.ADMIN),
     ParticipantControllers.deleteParticipant);
+
+// soft delete
+router.patch("/:id",
+    auth(UserRole.ADMIN),
+    ParticipantControllers.deleteWithUpdateParticipant);
 
 export const ParticipantRoutes = router;
