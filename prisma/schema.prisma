@@ -36,9 +36,11 @@ model Event {
   description  String
   type         EventType
   fee          Int
-  date         DateTime
+  startDate    DateTime
+  endDate      DateTime
   isPublic     Boolean       @default(true)
   venueOrLink  String
+  isHero       Boolean       @default(false)
   isDeleted    Boolean       @default(false)
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
