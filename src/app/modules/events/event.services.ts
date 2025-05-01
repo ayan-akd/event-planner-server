@@ -2,7 +2,10 @@ import { Event, UserStatus } from "@prisma/client";
 import prisma from "../../../shared/prisma";
 
 // Event Save to DB
-const eventSaveToDB = async (authInfo: any, payload: Event) => {
+const eventSaveToDB = async (
+  authInfo: any,
+  payload: Event
+): Promise<Event | null> => {
   // Check User
   await prisma.user.findUniqueOrThrow({
     where: {
@@ -18,7 +21,11 @@ const eventSaveToDB = async (authInfo: any, payload: Event) => {
 };
 
 // Event Update
-const eventUpdate = async (authInfo: any, eventId: string, payload: Event) => {
+const eventUpdate = async (
+  authInfo: any,
+  eventId: string,
+  payload: Partial<Event>
+): Promise<Event | null> => {
   // Check Event
   await prisma.event.findUniqueOrThrow({
     where: {
@@ -40,7 +47,7 @@ const eventUpdate = async (authInfo: any, eventId: string, payload: Event) => {
 };
 
 // Get All Events From DB
-const getAllEventsFromToDB = async () => {
+const getAllEventsFromToDB = async (): Promise<Event[] | []> => {
   const result = await prisma.event.findMany({
     where: {
       isDeleted: false,
@@ -55,7 +62,9 @@ const getAllEventsFromToDB = async () => {
 };
 
 // Get Logged In User Events From DB
-const getLoggedInUserEventsFromToDB = async (authInfo: any) => {
+const getLoggedInUserEventsFromToDB = async (
+  authInfo: any
+): Promise<Event[] | []> => {
   // Check User Status
   await prisma.user.findUniqueOrThrow({
     where: {
@@ -80,7 +89,9 @@ const getLoggedInUserEventsFromToDB = async (authInfo: any) => {
 };
 
 // Get Single Event From DB
-const getSingleEventsFromToDB = async (eventId: string) => {
+const getSingleEventsFromToDB = async (
+  eventId: string
+): Promise<Event | null> => {
   //  Find Event
   const result = await prisma.event.findUniqueOrThrow({
     where: {
@@ -100,7 +111,7 @@ const getSingleEventsFromToDB = async (eventId: string) => {
 const hardDeleteSingleEventsFromToDB = async (
   eventId: string,
   authInfo: any
-) => {
+): Promise<Event | null> => {
   // check User
   await prisma.user.findUniqueOrThrow({
     where: {
@@ -132,7 +143,7 @@ const hardDeleteSingleEventsFromToDB = async (
 const softDeleteSingleEventsFromToDB = async (
   eventId: string,
   authInfo: any
-) => {
+): Promise<Event | null> => {
   // check User
   await prisma.user.findUniqueOrThrow({
     where: {
