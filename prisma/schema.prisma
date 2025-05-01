@@ -9,94 +9,93 @@ datasource db {
 }
 
 model User {
-  id           String     @id @default(uuid())
-  name         String
-  username     String     @unique
-  email        String     @unique
-  password     String
-  profileImage String?
-  role         UserRole   @default(USER)
-  status       UserStatus @default(ACTIVE)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  isDeleted    Boolean    @default(false)
-  events       Event[]
-  participants Participant[]
-  receivedInvitations Invitation[] @relation("InvitationToParticipant")
-  sentInvitations     Invitation[] @relation("Inviter")
-  reviews Review[]
+  id                  String        @id @default(uuid())
+  name                String
+  username            String        @unique
+  email               String        @unique
+  password            String
+  profileImage        String?
+  role                UserRole      @default(USER)
+  status              UserStatus    @default(ACTIVE)
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  isDeleted           Boolean       @default(false)
+  events              Event[]
+  participants        Participant[]
+  receivedInvitations Invitation[]  @relation("InvitationToParticipant")
+  sentInvitations     Invitation[]  @relation("Inviter")
+  reviews             Review[]
 
   @@map("users")
 }
 
 model Event {
-  id          String     @id @default(uuid())
-  title       String
-  image       String
-  description String
-  type        EventType
-  fee         Int
-  date        DateTime
-  isPublic    Boolean @default(true)
-  venueOrLink String
-  isDeleted   Boolean    @default(false)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  organizerId String
-  organizer   User       @relation(fields: [organizerId], references: [id])
+  id           String        @id @default(uuid())
+  title        String
+  image        String
+  description  String
+  type         EventType
+  fee          Int
+  date         DateTime
+  isPublic     Boolean       @default(true)
+  venueOrLink  String
+  isDeleted    Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  organizerId  String
+  organizer    User          @relation(fields: [organizerId], references: [id])
   participants Participant[]
-  invitations Invitation[]
-  reviews Review[]
-  
+  invitations  Invitation[]
+  reviews      Review[]
+
   @@map("events")
 }
 
 model Participant {
-  id        String @id @default(uuid())
-  eventId String
-  event  Event @relation(fields: [eventId], references: [id])
+  id        String            @id @default(uuid())
+  eventId   String
   userId    String
-  user      User   @relation(fields: [userId], references: [id])
   status    ParticipantStatus @default(PENDING)
-  hasPaid   Boolean @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  isDeleted Boolean @default(false)
-  inviteId   String?
+  inviteId  String?
+  hasPaid   Boolean           @default(false)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  isDeleted Boolean           @default(false)
+  user      User              @relation(fields: [userId], references: [id])
+  event     Event             @relation(fields: [eventId], references: [id])
 
   @@map("participants")
 }
 
 model Invitation {
-  id        String @id @default(uuid())
-  participantId    String
-  eventId String
-  status    InvitationStatus @default(PENDING)
-  inviterId String
-  hasRead    Boolean @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  isDeleted Boolean @default(false)
+  id            String           @id @default(uuid())
+  participantId String
+  eventId       String
+  inviterId     String
+  status        InvitationStatus @default(PENDING)
+  hasRead       Boolean          @default(false)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  isDeleted     Boolean          @default(false)
 
-
-  user      User   @relation("InvitationToParticipant", fields: [participantId], references: [id])
-  event  Event @relation(fields: [eventId], references: [id])
-  inviter   User   @relation("Inviter",fields: [inviterId], references: [id])
+  user    User  @relation("InvitationToParticipant", fields: [participantId], references: [id])
+  event   Event @relation(fields: [eventId], references: [id])
+  inviter User  @relation("Inviter", fields: [inviterId], references: [id])
 
   @@map("invitations")
 }
 
 model Review {
-  id        String @id @default(uuid())
+  id        String   @id @default(uuid())
   userId    String
-  eventId String
+  eventId   String
   rating    Int
   comment   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  isDeleted Boolean @default(false)
-  user      User   @relation(fields: [userId], references: [id])
-  event  Event @relation(fields: [eventId], references: [id])
+  isDeleted Boolean  @default(false)
+  user      User     @relation(fields: [userId], references: [id])
+  event     Event    @relation(fields: [eventId], references: [id])
 
   @@map("reviews")
 }
