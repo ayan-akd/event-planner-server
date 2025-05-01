@@ -1,8 +1,9 @@
 import { Event, UserStatus } from "@prisma/client";
 import prisma from "../../../shared/prisma";
+import { TUserFromToken } from "../users/user.interface";
 
 // Event Save to DB
-const eventSaveToDB = async (authInfo: any, payload: Event) => {
+const eventSaveToDB = async (authInfo: TUserFromToken, payload: Event) => {
   // Check User
   await prisma.user.findUniqueOrThrow({
     where: {
@@ -28,7 +29,7 @@ const getAllEventsFromToDB = async () => {
 
 // Get Logged In User Events From DB
 // Event Save to DB
-const getLoggedInUserEventsFromToDB = async (authInfo: any) => {
+const getLoggedInUserEventsFromToDB = async (authInfo: TUserFromToken) => {
   // Check User Status
   await prisma.user.findUniqueOrThrow({
     where: {

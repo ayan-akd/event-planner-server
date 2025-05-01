@@ -1,13 +1,13 @@
 import { NextFunction, Request, Response } from "express";
 import config from "../../config";
-import { Secret } from "jsonwebtoken";
+import { JwtPayload, Secret } from "jsonwebtoken";
 import httpStatus from "http-status";
 import ApiError from "../errors/ApiError";
 import { jwtHelpers } from "../../utils/jwtHelpers";
 
 const auth = (...roles: string[]) => {
   return async (
-    req: Request & { user?: any },
+    req: Request & { user?: JwtPayload },
     res: Response,
     next: NextFunction
   ) => {

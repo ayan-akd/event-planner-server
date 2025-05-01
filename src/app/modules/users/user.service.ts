@@ -1,7 +1,7 @@
 import prisma from "../../../shared/prisma";
 import httpStatus from "http-status";
 import { AppError } from "../../errors/AppError";
-import { UserStatus } from "@prisma/client";
+import { User, UserStatus } from "@prisma/client";
 
 const getAllUsersFromDB = async () => {
   const result = await prisma.user.findMany({
@@ -45,7 +45,7 @@ const getSingleUserFromDB = async (id: string) => {
   return result;
 };
 
-const updateUserIntoDB = async (id: string, data: any) => {
+const updateUserIntoDB = async (id: string, data: Partial<User>) => {
   const isExist = await prisma.user.findUnique({
     where: {
       id,

@@ -7,6 +7,7 @@ const generateToken = (
 ): string => {
   const token = jwt.sign(payload, secret, {
     algorithm: "HS256",
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expiresIn: expiresIn as any,
   });
 

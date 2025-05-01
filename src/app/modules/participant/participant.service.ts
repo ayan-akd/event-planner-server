@@ -3,11 +3,10 @@ import httpStatus from "http-status";
 import { AppError } from "../../errors/AppError";
 import { Participant } from "@prisma/client";
 
-
 const createParticipantIntoDB = async (data: Participant) => {
-console.log(data, "data in participant service");
+  console.log(data, "data in participant service");
 
-const isUserExists = await prisma.user.findUnique({
+  const isUserExists = await prisma.user.findUnique({
     where: {
       id: data.userId,
     },
@@ -49,30 +48,34 @@ const getAllParticipantsFromDB = async () => {
 };
 
 const getSingleParticipantFromDB = async (id: string) => {
-    
   const participant = await prisma.participant.findUnique({
     where: { id },
   });
-  if (!participant) throw new AppError(httpStatus.NOT_FOUND, "Participant not found");
-  
+  if (!participant)
+    throw new AppError(httpStatus.NOT_FOUND, "Participant not found");
+
   return participant;
 };
 
-const updateParticipantIntoDB = async (id: string, data: Partial<Participant>) => {
-
+const updateParticipantIntoDB = async (
+  id: string,
+  data: Partial<Participant>
+) => {
   const isExist = await prisma.participant.findUnique({ where: { id } });
-  if (!isExist) throw new AppError(httpStatus.NOT_FOUND, "Participant not found");
+  if (!isExist)
+    throw new AppError(httpStatus.NOT_FOUND, "Participant not found");
 
   const result = prisma.participant.update({ where: { id }, data });
-    return result;
+  return result;
 };
 
 const deleteParticipantFromDB = async (id: string) => {
-    // Soft delete
+  // Soft delete
   const isExist = await prisma.participant.findUnique({ where: { id } });
-  if (!isExist) throw new AppError(httpStatus.NOT_FOUND, "Participant not found");
-  
-  const result = await prisma.participant.update({
+  if (!isExist)
+    throw new AppError(httpStatus.NOT_FOUND, "Participant not found");
+
+  await prisma.participant.update({
     where: {
       id,
     },
@@ -83,7 +86,7 @@ const deleteParticipantFromDB = async (id: string) => {
 };
 
 export const ParticipantServices = {
-    createParticipantIntoDB,
+  createParticipantIntoDB,
   getAllParticipantsFromDB,
   getSingleParticipantFromDB,
   updateParticipantIntoDB,
