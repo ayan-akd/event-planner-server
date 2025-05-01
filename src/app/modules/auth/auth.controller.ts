@@ -34,6 +34,23 @@ const logInController = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getMeController = catchAsync(
+  async (req: Request & { user?: TUserFromToken }, res: Response) => {
+    if (!req.user) {
+      throw new Error("User is required");
+    }
+    const { email } = req.user;
+    console.log(email);
+    const result = await AuthService.getMeFromDb(email);
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "User fetched successfully",
+      data: result,
+    });
+  }
+);
+
 const refreshTokenController = catchAsync(async (req: Request, res: Response) => {
     const { refreshToken } = req.cookies;
     const result = await AuthService.refreshToken(refreshToken);
@@ -68,6 +85,7 @@ const changePasswordController = catchAsync(
 export const AuthController = {
   signUpController,
   logInController,
+  getMeController,
   changePasswordController,
   refreshTokenController,
 };

@@ -5,6 +5,8 @@ import { Request } from "express";
 import { jwtHelpers } from "../../../utils/jwtHelpers";
 import config from "../../../config";
 import { Secret } from "jsonwebtoken";
+import { AppError } from "../../errors/AppError";
+import httpStatus from "http-status";
 
 const signUp = async (req: Request): Promise<User> => {
   const hashedPassword: string = await bcrypt.hash(req.body.password, 12);
@@ -61,6 +63,30 @@ const logIn = async (payload: { email: string; password: string }) => {
     accessToken,
     refreshToken,
   };
+};
+
+const getMeFromDb = async (email: string) => {
+  const result = await prisma.user.findUnique({
+    where: {
+      email,
+    },
+    select: {
+      id: true,
+      name: true,
+      username: true,
+      email: true,
+      profileImage: true,
+      role: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+      isDeleted: true,
+    },
+  });
+  if (!result) {
+    throw new AppError(httpStatus.NOT_FOUND, "user not found");
+  }
+  return result;
 };
 
 const refreshToken = async (token: string) => {
@@ -130,9 +156,12 @@ const changePassword = async (
   return result;
 };
 
+
+
 export const AuthService = {
   signUp,
   logIn,
+  getMeFromDb,
   changePassword,
   refreshToken,
 };
