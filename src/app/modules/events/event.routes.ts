@@ -3,6 +3,8 @@ import { Router } from "express";
 import auth from "../../middlewares/auth";
 import { EventController } from "./event.controllers";
 import { UserRole } from "@prisma/client";
+import validateRequest from "../../middlewares/validateRequest";
+import { EventValidation } from "./event.validation";
 // import validateRequest from "../../middlewares/validateRequest";
 // import { ReviewValidation } from "./review.validation";
 
@@ -10,7 +12,12 @@ import { UserRole } from "@prisma/client";
 const eventRouter = Router();
 
 //  Create Event
-eventRouter.post("/create", auth(UserRole.USER), EventController.createEvent);
+eventRouter.post(
+  "/create",
+  auth(UserRole.USER),
+  validateRequest(EventValidation.eventCreateZodSchema),
+  EventController.createEvent
+);
 // Get All Events Route
 eventRouter.get("/", EventController.getAllEvents);
 // Get Logged In User Route
