@@ -10,13 +10,15 @@ const createInvitationZodSchema = z.object({
     }),
     inviterId: z.string({
       required_error: "inviterId is required",
-    })
+    }),
   }),
 });
 
 const updateInvitationZodSchema = z.object({
   body: z.object({
-    status: z.string().optional(),
+    status: z
+      .enum(["ACCEPTED", "REJECTED"] as [string, ...string[]])
+      .optional(),
     hasRead: z.boolean().optional(),
   }),
 });
