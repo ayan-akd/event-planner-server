@@ -44,5 +44,13 @@ eventRouter.delete(
   EventController.softDeleteEvent
 );
 
+//Update Single Event Route
+eventRouter.patch(
+  "/:eventId",
+  auth(UserRole.USER),
+  validateRequest(EventValidation.eventUpdateZodSchema),
+  EventController.updateSingleEvent
+);
+
 // Export Route
 export const EventRoutes = eventRouter;

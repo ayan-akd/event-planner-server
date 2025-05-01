@@ -17,6 +17,28 @@ const eventSaveToDB = async (authInfo: any, payload: Event) => {
   return result;
 };
 
+// Event Update
+const eventUpdate = async (authInfo: any, eventId: string, payload: Event) => {
+  // Check Event
+  await prisma.event.findUniqueOrThrow({
+    where: {
+      organizerId: authInfo.userId,
+      id: eventId,
+      isDeleted: false,
+    },
+  });
+  // Update Event
+  const result = await prisma.event.update({
+    where: {
+      organizerId: authInfo.userId,
+      id: eventId,
+      isDeleted: false,
+    },
+    data: payload,
+  });
+  return result;
+};
+
 // Get All Events From DB
 const getAllEventsFromToDB = async () => {
   const result = await prisma.event.findMany({
@@ -148,4 +170,5 @@ export const EventService = {
   getSingleEventsFromToDB,
   hardDeleteSingleEventsFromToDB,
   softDeleteSingleEventsFromToDB,
+  eventUpdate,
 };

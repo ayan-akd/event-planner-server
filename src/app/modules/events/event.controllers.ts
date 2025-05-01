@@ -120,6 +120,25 @@ const softDeleteEvent = catchAsync(
   }
 );
 
+/**
+ * @Description Update Single Event
+ * @Method PATCH
+ * @Params eventId
+ * @Return Event Data
+ */
+const updateSingleEvent = catchAsync(
+  async (req: Request & { user?: any }, res: Response) => {
+    const { eventId } = req.params;
+    const result = await EventService.eventUpdate(req.user, eventId, req.body);
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Event Updated successfully",
+      data: result,
+    });
+  }
+);
+
 export const EventController = {
   createEvent,
   getLoggedInUserEvents,
@@ -127,4 +146,5 @@ export const EventController = {
   hardDeleteEvent,
   getSingleEvent,
   softDeleteEvent,
+  updateSingleEvent,
 };
