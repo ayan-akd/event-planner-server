@@ -40,7 +40,6 @@ const getMeController = catchAsync(
       throw new Error("User is required");
     }
     const { email } = req.user;
-    console.log(email);
     const result = await AuthService.getMeFromDb(email);
     sendResponse(res, {
       statusCode: httpStatus.OK,
