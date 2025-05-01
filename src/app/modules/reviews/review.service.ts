@@ -38,6 +38,20 @@ const createReviewToDB = async (data: Review) => {
     throw new AppError(httpStatus.NOT_FOUND, "event not found");
   }
 
+  const isUserParticipated = await prisma.participant.findFirst({
+    where: {
+      userId: data.userId,
+      eventId: data.eventId,
+      status: "APPROVED",
+    },
+  });
+  if (!isUserParticipated) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "you need to participate in the event first"
+    );
+  }
+
   const isReviewExists = await prisma.review.findFirst({
     where: {
       userId: data.userId,
