@@ -77,6 +77,24 @@ const createReviewToDB = async (data: Review) => {
   return result;
 };
 
+const updateReviewToDB = async (id: string, payload: Partial<Review>) => {
+  const isExist = await prisma.review.findUnique({
+    where: {
+      id,
+    },
+  });
+  if (!isExist) {
+    throw new AppError(httpStatus.NOT_FOUND, "review not found");
+  }
+  const result = await prisma.review.update({
+    where: {
+      id,
+    },
+    data: payload,
+  });
+  return result;
+};
+
 const deleteReviewFromDB = async (id: string) => {
   const isExist = await prisma.review.findUnique({
     where: {
@@ -101,4 +119,5 @@ export const ReviewService = {
   getSingleReviewFromDB,
   createReviewToDB,
   deleteReviewFromDB,
+  updateReviewToDB,
 };

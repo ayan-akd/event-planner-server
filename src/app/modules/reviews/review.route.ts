@@ -18,6 +18,8 @@ router.post(
   ReviewController.createReview
 );
 
-router.patch("/:id", auth(UserRole.ADMIN), ReviewController.deleteReview);
+router.patch("/:id", auth(UserRole.ADMIN), ReviewController.updateReview);
+
+router.patch("/delete/:id", auth(UserRole.ADMIN), ReviewController.deleteReview);
 
 export const ReviewRoutes = router;

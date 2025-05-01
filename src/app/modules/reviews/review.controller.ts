@@ -35,6 +35,17 @@ const createReview = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const updateReview = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await ReviewService.updateReviewToDB(id, req.body);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Review updated successfully",
+    data: result,
+  });
+});
+
 const deleteReview = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   await ReviewService.deleteReviewFromDB(id);
@@ -50,5 +61,6 @@ export const ReviewController = {
   getAllReviews,
   getSingleReview,
   createReview,
+  updateReview,
   deleteReview,
 };

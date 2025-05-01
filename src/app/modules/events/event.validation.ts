@@ -10,7 +10,7 @@ const eventCreateZodSchema = z.object({
     type: z.enum([EventType.OFFLINE, EventType.ONLINE], {
       required_error: "Type Is Required",
     }),
-    fee: z.number({ required_error: "Fee Is Required" }),
+    fee: z.number().min(0).optional(),
     date: z.string({ required_error: "Date Is Required" }),
     venueOrLink: z.string({ required_error: "VenueOrLink Is Required" }),
   }),
@@ -29,7 +29,7 @@ const eventUpdateZodSchema = z.object({
         required_error: "Type Is Required",
       })
       .optional(),
-    fee: z.number({ required_error: "Fee Is Required" }).optional(),
+    fee: z.number().min(0).optional(),
     date: z.string({ required_error: "Date Is Required" }).optional(),
     venueOrLink: z
       .string({ required_error: "VenueOrLink Is Required" })
