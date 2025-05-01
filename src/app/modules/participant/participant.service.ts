@@ -60,8 +60,13 @@ const isUserExists = await prisma.user.findUniqueOrThrow({
     );
   }
 
-   // Auto approve if event fee is 0
-   const status = isEventExists.fee === 0 ? "APPROVED" : data.status || "PENDING";
+   // Auto approve if event isPublic is true && fee is 0 using tarnary operator
+   const {
+    isPublic,
+    fee,
+   } = isEventExists;
+
+  const status = isPublic && fee === 0 ? "APPROVED" : data.status ||"PENDING";
 
 
   const result = await prisma.participant.create({
