@@ -90,36 +90,37 @@ const getMeFromDb = async (email: string) => {
 };
 
 const refreshToken = async (token: string) => {
-    let decodedData;
-    try {
-        decodedData = jwtHelpers.verifyToken(token, config.jwt.refresh_token_secret as Secret);
-    }
-    catch (err) {
-        throw new Error("You are not authorized!")
-    }
-
-    const userData = await prisma.user.findUniqueOrThrow({
-        where: {
-            email: decodedData.email,
-            status: UserStatus.ACTIVE
-        }
-    });
-
-    const accessToken = jwtHelpers.generateToken({
-        userId: userData.id,
-        email: userData.email,
-        role: userData.role
-    },
-        config.jwt.jwt_secret as Secret,
-        config.jwt.jwt_expires_in as string
+  let decodedData;
+  try {
+    decodedData = jwtHelpers.verifyToken(
+      token,
+      config.jwt.refresh_token_secret as Secret
     );
+  } catch {
+    throw new Error("You are not authorized!");
+  }
 
-    return {
-        accessToken,
-    };
+  const userData = await prisma.user.findUniqueOrThrow({
+    where: {
+      email: decodedData.email,
+      status: UserStatus.ACTIVE,
+    },
+  });
 
+  const accessToken = jwtHelpers.generateToken(
+    {
+      userId: userData.id,
+      email: userData.email,
+      role: userData.role,
+    },
+    config.jwt.jwt_secret as Secret,
+    config.jwt.jwt_expires_in as string
+  );
+
+  return {
+    accessToken,
+  };
 };
-
 
 const changePassword = async (
   userId: string,
@@ -155,8 +156,6 @@ const changePassword = async (
   });
   return result;
 };
-
-
 
 export const AuthService = {
   signUp,

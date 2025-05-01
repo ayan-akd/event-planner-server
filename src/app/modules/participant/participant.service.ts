@@ -3,7 +3,6 @@ import httpStatus from "http-status";
 import { AppError } from "../../errors/AppError";
 import { Participant } from "@prisma/client";
 
-
 const createParticipantIntoDB = async (data: Participant) => {
 // console.log(data, "data in participant service");
 
@@ -53,24 +52,27 @@ const getAllParticipantsFromDB = async () => {
 };
 
 const getSingleParticipantFromDB = async (id: string) => {
-    
   const participant = await prisma.participant.findUnique({
     where: { id,
       isDeleted: false,
      },
   });
-  if (!participant) throw new AppError(httpStatus.NOT_FOUND, "Participant not found");
-  
+  if (!participant)
+    throw new AppError(httpStatus.NOT_FOUND, "Participant not found");
+
   return participant;
 };
 
-const updateParticipantIntoDB = async (id: string, data: Partial<Participant>) => {
-
+const updateParticipantIntoDB = async (
+  id: string,
+  data: Partial<Participant>
+) => {
   const isExist = await prisma.participant.findUnique({ where: { id } });
-  if (!isExist) throw new AppError(httpStatus.NOT_FOUND, "Participant not found");
+  if (!isExist)
+    throw new AppError(httpStatus.NOT_FOUND, "Participant not found");
 
   const result = prisma.participant.update({ where: { id }, data });
-    return result;
+  return result;
 };
 
 // hard delete
@@ -92,9 +94,10 @@ const hardDeleteParticipantFromDB = async (id: string) => {
 const softDeleteParticipantFromDB = async (id: string) => {
     // Soft delete
   const isExist = await prisma.participant.findUnique({ where: { id } });
-  if (!isExist) throw new AppError(httpStatus.NOT_FOUND, "Participant not found");
-  
-  const result = await prisma.participant.update({
+  if (!isExist)
+    throw new AppError(httpStatus.NOT_FOUND, "Participant not found");
+
+  await prisma.participant.update({
     where: {
       id,
     },
@@ -105,7 +108,7 @@ const softDeleteParticipantFromDB = async (id: string) => {
 };
 
 export const ParticipantServices = {
-    createParticipantIntoDB,
+  createParticipantIntoDB,
   getAllParticipantsFromDB,
   getSingleParticipantFromDB,
   updateParticipantIntoDB,
