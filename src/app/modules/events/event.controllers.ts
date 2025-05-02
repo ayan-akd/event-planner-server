@@ -4,6 +4,8 @@ import sendResponse from "../../../utils/sendResponse";
 import httpStatus from "http-status";
 import { EventService } from "./event.services";
 import { TUserFromToken } from "../users/user.interface";
+import pick from "../../../utils/pick";
+import { EventValidateQueryData } from "./event.constant";
 
 /**
  * @Description Create Event
@@ -54,7 +56,10 @@ const getLoggedInUserEvents = catchAsync(
  * @Return Event Data
  */
 const getAllEvents = catchAsync(async (req: Request, res: Response) => {
-  const result = await EventService.getAllEventsFromToDB();
+  // Select Valid Key and Value
+  const filter = pick(req.query, EventValidateQueryData);
+  const options = pick(req.query, ["page", "limit", "sortBy", "sortOrder"]);
+  const result = await EventService.getAllEventsFromToDB(filter, options);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,

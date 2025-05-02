@@ -1,6 +1,9 @@
 import { Event, Prisma, UserRole, UserStatus } from "@prisma/client";
 import prisma from "../../../shared/prisma";
 import { TUserFromToken } from "../users/user.interface";
+import { IPaginationOptions } from "../../interfaces/pagination";
+import { paginationHelper } from "../../../utils/paginationHelper";
+import { EventSearchAbleFields } from "./event.constant";
 
 // Event Save to DB
 const eventSaveToDB = async (
@@ -48,11 +51,85 @@ const eventUpdate = async (
 };
 
 // Get All Events From DB
-const getAllEventsFromToDB = async (): Promise<Event[] | []> => {
+// const getAllEventsFromToDB = async (): Promise<Event[] | []> => {
+//   const result = await prisma.event.findMany({
+//     where: {
+//       isDeleted: false,
+//     },
+//     include: {
+//       organizer: true,
+//       invitations: true,
+//       participants: true,
+//       reviews: true,
+//     },
+//   });
+//   return result;
+// };
+
+const getAllEventsFromToDB = async (
+  query: any,
+  options: IPaginationOptions
+) => {
+  // All Query Data
+  const { searchTerm, ...filteredData } = query;
+
+  // Pagination Data
+  const { page, limit, skip } = paginationHelper.calculatePagination(options);
+
+  //  User SearchTerm data
+  const andCondition: Prisma.EventWhereInput[] = [];
+
+  // Check Query Data
+  if (query?.searchTerm) {
+    andCondition.push({
+      OR: [
+        ...EventSearchAbleFields?.map((field) => ({
+          [field]: {
+            contains: query?.searchTerm,
+            mode: "insensitive",
+          },
+        })),
+        {
+          organizer: {
+            name: {
+              contains: query?.searchTerm,
+              mode: "insensitive",
+            },
+          },
+        },
+      ],
+    });
+  }
+
+  // Filter Data
+  if (Object.keys(filteredData)?.length > 0) {
+    andCondition.push({
+      AND: Object.keys(filteredData)?.map((key) => ({
+        [key]: {
+          equals: (filteredData as any)[key],
+        },
+      })),
+    });
+  }
+
+  // Make Object Data  Using ANT Operator
+  const whereCondition: Prisma.EventWhereInput =
+    andCondition.length > 0 ? { AND: andCondition } : {};
+
+  // Get User Info
   const result = await prisma.event.findMany({
-    where: {
-      isDeleted: false,
-    },
+    // Search User By Name or title
+    where: whereCondition,
+    skip,
+    take: limit,
+    orderBy:
+      options?.sortBy && options?.sortOrder
+        ? {
+            [options?.sortBy]: options?.sortOrder,
+          }
+        : {
+            createdAt: "asc",
+          },
     include: {
       organizer: true,
       invitations: true,
@@ -60,7 +137,19 @@ const getAllEventsFromToDB = async (): Promise<Event[] | []> => {
       reviews: true,
     },
   });
-  return result;
+
+  //  Total Data
+  const total = await prisma.event.count({
+    where: whereCondition,
+  });
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    result,
+  };
 };
 
 const getLoggedInUserEventsFromToDB = async (
