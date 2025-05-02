@@ -11,7 +11,8 @@ const eventCreateZodSchema = z.object({
       required_error: "Type Is Required",
     }),
     fee: z.number().min(0).optional(),
-    date: z.string({ required_error: "Date Is Required" }),
+    startDate: z.string({ required_error: "Start Date Is Required" }),
+    endDate: z.string({ required_error: "End Date Is Required" }),
     venueOrLink: z.string({ required_error: "VenueOrLink Is Required" }),
   }),
 });
@@ -37,7 +38,15 @@ const eventUpdateZodSchema = z.object({
   }),
 });
 
+// Update Hero Event Status Validation Schema
+const heroEventStatusUpdateZodSchema = z.object({
+  body: z.object({
+    status: z.boolean({ required_error: "Status Is Required" }),
+  }),
+});
+
 export const EventValidation = {
   eventCreateZodSchema,
   eventUpdateZodSchema,
+  heroEventStatusUpdateZodSchema,
 };

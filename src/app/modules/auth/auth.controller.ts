@@ -30,6 +30,7 @@ const logInController = catchAsync(async (req: Request, res: Response) => {
     message: "User logged in successfully",
     data: {
       accessToken,
+      refreshToken,
     },
   });
 });
@@ -50,36 +51,33 @@ const getMeController = catchAsync(
   }
 );
 
-const refreshTokenController = catchAsync(async (req: Request, res: Response) => {
+const refreshTokenController = catchAsync(
+  async (req: Request, res: Response) => {
     const { refreshToken } = req.cookies;
     const result = await AuthService.refreshToken(refreshToken);
     sendResponse(res, {
-        statusCode: httpStatus.OK,
-        success: true,
-        message: "Access token generated successfully!",
-        data: result
-    })
-});
-
-
-
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Access token generated successfully!",
+      data: result,
+    });
+  }
+);
 
 const changePasswordController = catchAsync(
   async (req: Request & { user?: TUserFromToken }, res: Response) => {
     if (!req.user?.userId) {
-      throw new Error('User ID is required');
+      throw new Error("User ID is required");
     }
-    const result = await AuthService.changePassword(
-      req.user.userId,
-      req.body
-    );
+    const result = await AuthService.changePassword(req.user.userId, req.body);
     sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,
       message: "Password changed successfully",
       data: result,
     });
-  });
+  }
+);
 
 export const AuthController = {
   signUpController,
