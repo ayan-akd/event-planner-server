@@ -20,6 +20,8 @@ eventRouter.post(
 );
 // Get All Events Route
 eventRouter.get("/", EventController.getAllEvents);
+// Get Admin Selected Hero Event Route
+eventRouter.get("/hero-event", EventController.getAdminSelectedHeroEvent);
 // Get Logged In User Route
 eventRouter.get(
   "/my-events",

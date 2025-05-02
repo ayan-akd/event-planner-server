@@ -329,6 +329,25 @@ const heroSelectByAdmin = async (
   return result;
 };
 
+// Get Admin Selected Events From DB
+const getAdminSelectedEventsFromToDB = async (): Promise<Event | null> => {
+  // Check User
+  const result = await prisma.event.findFirstOrThrow({
+    where: {
+      isHero: true,
+      isDeleted: false,
+    },
+    include: {
+      organizer: true,
+      invitations: true,
+      participants: true,
+      reviews: true,
+    },
+  });
+
+  return result;
+};
+
 export const EventService = {
   eventSaveToDB,
   getAllEventsFromToDB,
@@ -338,4 +357,5 @@ export const EventService = {
   softDeleteSingleEventsFromToDB,
   eventUpdate,
   heroSelectByAdmin,
+  getAdminSelectedEventsFromToDB,
 };
