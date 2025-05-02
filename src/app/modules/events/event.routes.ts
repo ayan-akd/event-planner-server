@@ -52,5 +52,13 @@ eventRouter.patch(
   EventController.updateSingleEvent
 );
 
+//Update Single Event Status Route
+eventRouter.patch(
+  "/:eventId/hero",
+  auth(UserRole.ADMIN),
+  validateRequest(EventValidation.heroEventStatusUpdateZodSchema),
+  EventController.updateSingleEventHeroStatus
+);
+
 // Export Route
 export const EventRoutes = eventRouter;

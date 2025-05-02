@@ -4,6 +4,8 @@ import sendResponse from "../../../utils/sendResponse";
 import httpStatus from "http-status";
 import { EventService } from "./event.services";
 import { TUserFromToken } from "../users/user.interface";
+import pick from "../../../utils/pick";
+import { EventValidateQueryData } from "./event.constant";
 
 /**
  * @Description Create Event
@@ -54,7 +56,10 @@ const getLoggedInUserEvents = catchAsync(
  * @Return Event Data
  */
 const getAllEvents = catchAsync(async (req: Request, res: Response) => {
-  const result = await EventService.getAllEventsFromToDB();
+  // Select Valid Key and Value
+  const filter = pick(req.query, EventValidateQueryData);
+  const options = pick(req.query, ["page", "limit", "sortBy", "sortOrder"]);
+  const result = await EventService.getAllEventsFromToDB(filter, options);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -154,6 +159,32 @@ const updateSingleEvent = catchAsync(
   }
 );
 
+/**
+ * @Description Update Single Event Hero Status
+ * @Method PATCH
+ * @Params eventId
+ * @Return Event Data
+ */
+const updateSingleEventHeroStatus = catchAsync(
+  async (req: Request & { user?: TUserFromToken }, res: Response) => {
+    const { eventId } = req.params;
+    if (!req.user) {
+      throw new Error("User not found");
+    }
+    const result = await EventService.heroSelectByAdmin(
+      req.user,
+      eventId,
+      req.body
+    );
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Hero Selected successfully",
+      data: result,
+    });
+  }
+);
+
 export const EventController = {
   createEvent,
   getLoggedInUserEvents,
@@ -162,4 +193,5 @@ export const EventController = {
   getSingleEvent,
   softDeleteEvent,
   updateSingleEvent,
+  updateSingleEventHeroStatus,
 };
