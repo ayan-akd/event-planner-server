@@ -1,4 +1,4 @@
-import { Event, Prisma, UserStatus } from "@prisma/client";
+import { Event, Prisma, UserRole, UserStatus } from "@prisma/client";
 import prisma from "../../../shared/prisma";
 import { TUserFromToken } from "../users/user.interface";
 
@@ -54,6 +54,7 @@ const getAllEventsFromToDB = async (): Promise<Event[] | []> => {
       isDeleted: false,
     },
     include: {
+      organizer: true,
       invitations: true,
       participants: true,
       reviews: true,
@@ -80,6 +81,7 @@ const getLoggedInUserEventsFromToDB = async (
       isDeleted: false,
     },
     include: {
+      organizer: true,
       invitations: true,
       participants: true,
       reviews: true,
@@ -99,6 +101,7 @@ const getSingleEventsFromToDB = async (
       isDeleted: false,
     },
     include: {
+      organizer: true,
       invitations: true,
       participants: true,
       reviews: true,
@@ -174,6 +177,49 @@ const softDeleteSingleEventsFromToDB = async (
   return result;
 };
 
+// Hero Event Select by Admin
+const heroSelectByAdmin = async (
+  authInfo: TUserFromToken,
+  eventId: string,
+  payload: { status: boolean }
+) => {
+  // Check User
+  await prisma.user.findUniqueOrThrow({
+    where: {
+      id: authInfo.userId,
+      isDeleted: false,
+      status: UserStatus.ACTIVE,
+      role: UserRole.ADMIN,
+    },
+  });
+
+  // Check Hero Event
+  await prisma.event.updateMany({
+    where: {
+      isHero: true,
+    },
+    data: {
+      isHero: false,
+    },
+  });
+  // Update Hero Event
+  const result = await prisma.event.update({
+    where: {
+      id: eventId,
+      isDeleted: false,
+    },
+    data: {
+      isHero: payload.status,
+    },
+    include: {
+      invitations: true,
+      participants: true,
+      reviews: true,
+    },
+  });
+  return result;
+};
+
 export const EventService = {
   eventSaveToDB,
   getAllEventsFromToDB,
@@ -182,4 +228,5 @@ export const EventService = {
   hardDeleteSingleEventsFromToDB,
   softDeleteSingleEventsFromToDB,
   eventUpdate,
+  heroSelectByAdmin,
 };

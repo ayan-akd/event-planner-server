@@ -154,6 +154,32 @@ const updateSingleEvent = catchAsync(
   }
 );
 
+/**
+ * @Description Update Single Event Hero Status
+ * @Method PATCH
+ * @Params eventId
+ * @Return Event Data
+ */
+const updateSingleEventHeroStatus = catchAsync(
+  async (req: Request & { user?: TUserFromToken }, res: Response) => {
+    const { eventId } = req.params;
+    if (!req.user) {
+      throw new Error("User not found");
+    }
+    const result = await EventService.heroSelectByAdmin(
+      req.user,
+      eventId,
+      req.body
+    );
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Hero Selected successfully",
+      data: result,
+    });
+  }
+);
+
 export const EventController = {
   createEvent,
   getLoggedInUserEvents,
@@ -162,4 +188,5 @@ export const EventController = {
   getSingleEvent,
   softDeleteEvent,
   updateSingleEvent,
+  updateSingleEventHeroStatus,
 };

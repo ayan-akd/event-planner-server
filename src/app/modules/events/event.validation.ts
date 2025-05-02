@@ -38,7 +38,15 @@ const eventUpdateZodSchema = z.object({
   }),
 });
 
+// Update Hero Event Status Validation Schema
+const heroEventStatusUpdateZodSchema = z.object({
+  body: z.object({
+    status: z.boolean({ required_error: "Status Is Required" }),
+  }),
+});
+
 export const EventValidation = {
   eventCreateZodSchema,
   eventUpdateZodSchema,
+  heroEventStatusUpdateZodSchema,
 };
