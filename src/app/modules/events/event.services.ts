@@ -3,7 +3,7 @@ import prisma from "../../../shared/prisma";
 import { TUserFromToken } from "../users/user.interface";
 import { IPaginationOptions } from "../../interfaces/pagination";
 import { paginationHelper } from "../../../utils/paginationHelper";
-import { EventSearchAbleFields } from "./event.constant";
+import { EventSearchAbleFields, EventTypes } from "./event.constant";
 
 // Event Save to DB
 const eventSaveToDB = async (
@@ -50,28 +50,12 @@ const eventUpdate = async (
   return result;
 };
 
-// Get All Events From DB
-// const getAllEventsFromToDB = async (): Promise<Event[] | []> => {
-//   const result = await prisma.event.findMany({
-//     where: {
-//       isDeleted: false,
-//     },
-//     include: {
-//       organizer: true,
-//       invitations: true,
-//       participants: true,
-//       reviews: true,
-//     },
-//   });
-//   return result;
-// };
-
 const getAllEventsFromToDB = async (
   query: any,
   options: IPaginationOptions
 ) => {
   // All Query Data
-  const { searchTerm, ...filteredData } = query;
+  const { searchTerm, eventType, ...filteredData } = query;
 
   // Pagination Data
   const { page, limit, skip } = paginationHelper.calculatePagination(options);
@@ -99,6 +83,42 @@ const getAllEventsFromToDB = async (
         },
       ],
     });
+  }
+
+  // Event Type Filtering
+  if (eventType) {
+    switch (eventType) {
+      case EventTypes.FREE_PUBLIC:
+        andCondition.push({
+          isPublic: true,
+          fee: 0,
+        });
+        break;
+      case EventTypes.PAID_PUBLIC:
+        andCondition.push({
+          isPublic: true,
+          fee: {
+            gt: 0,
+          },
+        });
+        break;
+      case EventTypes.FREE_PRIVATE:
+        andCondition.push({
+          isPublic: false,
+          fee: 0,
+        });
+        break;
+      case EventTypes.PAID_PRIVATE:
+        andCondition.push({
+          isPublic: false,
+          fee: {
+            gt: 0,
+          },
+        });
+        break;
+      default:
+        break;
+    }
   }
 
   // Filter Data
