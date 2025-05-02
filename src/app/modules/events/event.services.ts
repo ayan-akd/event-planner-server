@@ -1,4 +1,4 @@
-import { Event, UserStatus } from "@prisma/client";
+import { Event, Prisma, UserStatus } from "@prisma/client";
 import prisma from "../../../shared/prisma";
 import { TUserFromToken } from "../users/user.interface";
 
@@ -62,7 +62,6 @@ const getAllEventsFromToDB = async (): Promise<Event[] | []> => {
   return result;
 };
 
-// Get Logged In User Events From DB
 const getLoggedInUserEventsFromToDB = async (
   authInfo: TUserFromToken
 ): Promise<Event[] | []> => {
