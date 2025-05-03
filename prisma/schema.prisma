@@ -105,18 +105,18 @@ model Review {
 }
 
 model Payment {
-  id        String   @id @default(uuid())
-  userId    String
-  eventId   String
-  amount    Int
-  status    PaymentStatus @default(PENDING)
+  id                 String        @id @default(uuid())
+  userId             String
+  eventId            String
+  amount             Int
+  status             PaymentStatus @default(PENDING)
   transactionId      String        @unique
   paymentGatewayData Json?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  isDeleted Boolean  @default(false)
-  user      User     @relation(fields: [userId], references: [id])
-  event     Event    @relation(fields: [eventId], references: [id])
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  isDeleted          Boolean       @default(false)
+  user               User          @relation(fields: [userId], references: [id])
+  event              Event         @relation(fields: [eventId], references: [id])
 
   @@map("payments")
 }
