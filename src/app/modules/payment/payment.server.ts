@@ -33,6 +33,22 @@ export const initializePayment = catchAsync(async (req, res) => {
     throw new AppError(httpStatus.BAD_REQUEST, "You are the host/own to this event, you do not need to pay for this event");
   }
 
+ // 🛑 Check for existing successful payment
+ const existingPayment = await prisma.payment.findFirst({
+  where: {
+    userId,
+    eventId,
+    status: 'SUCCESS',
+  },
+});
+
+if (existingPayment) {
+  throw new AppError(
+    httpStatus.BAD_REQUEST,
+    "You have already made a successful payment for this event."
+  );
+}
+
   const tran_id = generateTransactionId();
 
   const data= {
