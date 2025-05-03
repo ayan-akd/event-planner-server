@@ -185,6 +185,24 @@ const updateSingleEventHeroStatus = catchAsync(
   }
 );
 
+/**
+ * @Description Get Admin Selected Event
+ * @Method GET
+ * @Params ""
+ * @Return Event Data
+ */
+const getAdminSelectedHeroEvent = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await EventService.getAdminSelectedEventsFromToDB();
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Hero Event Retrieved successfully",
+      data: result,
+    });
+  }
+);
+
 export const EventController = {
   createEvent,
   getLoggedInUserEvents,
@@ -194,4 +212,5 @@ export const EventController = {
   softDeleteEvent,
   updateSingleEvent,
   updateSingleEventHeroStatus,
+  getAdminSelectedHeroEvent,
 };
