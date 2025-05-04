@@ -1,4 +1,4 @@
-import { Invitation } from "@prisma/client";
+import { Invitation, InvitationStatus } from "@prisma/client";
 import prisma from "../../../shared/prisma";
 import { AppError } from "../../errors/AppError";
 import httpStatus from "http-status";
@@ -84,6 +84,44 @@ const updateInvitationToDB = async (
   if (!isInvitationExists) {
     throw new AppError(httpStatus.NOT_FOUND, "invitation not found");
   }
+  if (payload.status === InvitationStatus.ACCEPTED) {
+    await prisma.$transaction(async (tx) => {
+      //update invitation status to accepted
+      const invitation =await tx.invitation.update({
+        where: {
+          id,
+        },
+        data: {
+          status: InvitationStatus.ACCEPTED,
+        },
+      });
+      //create a participant
+      const participant = await tx.participant.create({
+        data: {
+          eventId: isInvitationExists.eventId,
+          userId: isInvitationExists.participantId,
+          inviteId: isInvitationExists.id,
+        },
+      });
+      return {
+        invitation,
+        participant,
+      };
+    });
+  }
+  if (payload.status === InvitationStatus.REJECTED) {
+      const result = await prisma.invitation.update({
+        where: {
+          id,
+        },
+        data: {
+          status: InvitationStatus.REJECTED,
+          hasRead: true,
+        },
+      });
+      return result;
+  }
+
   const result = await prisma.invitation.update({
     where: {
       id,

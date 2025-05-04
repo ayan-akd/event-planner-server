@@ -9,7 +9,7 @@ const router = Router();
 
 router.post(
     "/create-participant",
-    auth(UserRole.ADMIN, UserRole.USER),
+    // auth(UserRole.ADMIN, UserRole.USER),
     validateRequest(ParticipantValidation.createParticipantSchema),
     ParticipantControllers.createParticipant
     );

@@ -37,8 +37,43 @@ const isUserExists = await prisma.user.findUniqueOrThrow({
     );
   }
 
+
+  // if (isEventExists.endDate < new Date()) {
+  //   throw new AppError(
+  //     httpStatus.BAD_REQUEST,
+  //     "Event has already ended"
+  //   );
+  // }
+
+  // if (isEventExists.startDate > new Date()) {
+  //   throw new AppError(
+  //     httpStatus.BAD_REQUEST,
+  //     "Event has not started yet"
+  //   );
+  // }
+
+
+  if (isEventExists.isDeleted) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Event has been deleted"
+    );
+  }
+
+   // Auto approve if event isPublic is true && fee is 0 using tarnary operator
+   const {
+    isPublic,
+    fee,
+   } = isEventExists;
+
+  const status = isPublic && fee === 0 ? "APPROVED" : data.status ||"PENDING";
+
+
   const result = await prisma.participant.create({
-    data,
+    data: {
+      ...data,
+      status,
+    },
   });
   return result;
 };
