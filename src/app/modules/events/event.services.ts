@@ -171,6 +171,7 @@ const getAllEventsFromToDB = async (
       page,
       limit,
       total,
+      totalPage: Math.ceil(total / limit),
     },
     result,
   };
@@ -253,6 +254,7 @@ const getLoggedInUserEventsFromToDB = async (
       page,
       limit,
       total,
+      totalPage: Math.ceil(total / limit),
     },
     result,
   };
