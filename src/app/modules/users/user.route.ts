@@ -7,7 +7,7 @@ import { UserValidation } from "./user.validation";
 
 const router = Router();
 
-router.get("/", auth(UserRole.ADMIN), UserController.getAllUsers);
+router.get("/", auth(UserRole.ADMIN, UserRole.USER), UserController.getAllUsers);
 
 router.get("/:id", UserController.getSingleUser);
 
