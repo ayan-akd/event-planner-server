@@ -148,7 +148,7 @@ const getAllEventsFromToDB = async (
             [options?.sortBy]: options?.sortOrder,
           }
         : {
-            createdAt: "asc",
+            createdAt: "desc",
           },
     include: {
       organizer: true,
