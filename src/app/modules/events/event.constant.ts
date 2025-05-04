@@ -1,5 +1,13 @@
 export const EventSearchAbleFields: string[] = ["title"];
+export const LoggedInUserEventSearchAbleFields: string[] = ["title"];
 export const EventValidateQueryData = [
+  "role",
+  "email",
+  "searchTerm",
+  "status",
+  "eventType",
+];
+export const LoggedInUserEventValidateQueryData = [
   "role",
   "email",
   "searchTerm",

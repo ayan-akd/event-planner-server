@@ -3,7 +3,11 @@ import prisma from "../../../shared/prisma";
 import { TUserFromToken } from "../users/user.interface";
 import { IPaginationOptions } from "../../interfaces/pagination";
 import { paginationHelper } from "../../../utils/paginationHelper";
-import { EventSearchAbleFields, EventTypes } from "./event.constant";
+import {
+  EventSearchAbleFields,
+  EventTypes,
+  LoggedInUserEventSearchAbleFields,
+} from "./event.constant";
 
 // Event Save to DB
 const eventSaveToDB = async (
@@ -173,8 +177,10 @@ const getAllEventsFromToDB = async (
 };
 
 const getLoggedInUserEventsFromToDB = async (
-  authInfo: TUserFromToken
-): Promise<Event[] | []> => {
+  authInfo: TUserFromToken,
+  query: any,
+  options: IPaginationOptions
+) => {
   // Check User Status
   await prisma.user.findUniqueOrThrow({
     where: {
@@ -183,12 +189,49 @@ const getLoggedInUserEventsFromToDB = async (
       isDeleted: false,
     },
   });
-  //  Find User
+  // All Query Data
+  const { searchTerm, ...filteredData } = query;
+
+  // Pagination Data
+  const { page, limit, skip } = paginationHelper.calculatePagination(options);
+
+  //  User SearchTerm data
+  const andCondition: Prisma.EventWhereInput[] = [];
+
+  // Check Query Data
+  if (query?.searchTerm) {
+    andCondition.push({
+      OR: LoggedInUserEventSearchAbleFields?.map((field) => ({
+        [field]: {
+          contains: query?.searchTerm,
+          mode: "insensitive",
+        },
+      })),
+    });
+  }
+
+  // Make Object Data  Using ANT Operator
+  const whereCondition: Prisma.EventWhereInput =
+    andCondition.length > 0 ? { AND: andCondition } : {};
+
+  // Get User Info
   const result = await prisma.event.findMany({
+    // Search Event Title Or Organizer Name
     where: {
+      ...whereCondition,
       organizerId: authInfo.userId,
       isDeleted: false,
     },
+    skip,
+    take: limit,
+    orderBy:
+      options?.sortBy && options?.sortOrder
+        ? {
+            [options?.sortBy]: options?.sortOrder,
+          }
+        : {
+            createdAt: "desc",
+          },
     include: {
       organizer: true,
       invitations: true,
@@ -196,10 +239,25 @@ const getLoggedInUserEventsFromToDB = async (
       reviews: true,
     },
   });
-  return result;
+
+  //  Total Data
+  const total = await prisma.event.count({
+    where: {
+      ...whereCondition,
+      organizerId: authInfo.userId,
+      isDeleted: false,
+    },
+  });
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    result,
+  };
 };
 
-// Get Single Event From DB
 const getSingleEventsFromToDB = async (
   eventId: string
 ): Promise<Event | null> => {
