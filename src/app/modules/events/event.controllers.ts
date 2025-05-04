@@ -5,7 +5,10 @@ import httpStatus from "http-status";
 import { EventService } from "./event.services";
 import { TUserFromToken } from "../users/user.interface";
 import pick from "../../../utils/pick";
-import { EventValidateQueryData } from "./event.constant";
+import {
+  EventValidateQueryData,
+  LoggedInUserEventValidateQueryData,
+} from "./event.constant";
 
 /**
  * @Description Create Event
@@ -39,7 +42,14 @@ const getLoggedInUserEvents = catchAsync(
     if (!req.user) {
       throw new Error("User not found");
     }
-    const result = await EventService.getLoggedInUserEventsFromToDB(req.user);
+    // Select Valid Key and Value
+    const filter = pick(req.query, LoggedInUserEventValidateQueryData);
+    const options = pick(req.query, ["page", "limit", "sortBy", "sortOrder"]);
+    const result = await EventService.getLoggedInUserEventsFromToDB(
+      req.user,
+      filter,
+      options
+    );
     sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,

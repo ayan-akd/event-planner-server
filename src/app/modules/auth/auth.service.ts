@@ -45,6 +45,7 @@ const logIn = async (payload: { email: string; password: string }) => {
       userId: isUserExist.id,
       email: isUserExist.email,
       role: isUserExist.role,
+      profileImage: isUserExist.profileImage,
     },
     config.jwt.jwt_secret as string,
     config.jwt.jwt_expires_in as string
@@ -112,6 +113,7 @@ const refreshToken = async (token: string) => {
       userId: userData.id,
       email: userData.email,
       role: userData.role,
+      profileImage: userData.profileImage,
     },
     config.jwt.jwt_secret as Secret,
     config.jwt.jwt_expires_in as string
