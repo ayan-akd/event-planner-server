@@ -2,15 +2,13 @@ import config from "../../../config";
 import prisma from "../../../shared/prisma";
 import catchAsync from "../../../utils/catchAsync";
 import { generateTransactionId } from "../../../utils/generateTransactionId";
-// import { initSSLCommerz } from "../ssl/util";
 import { AppError } from "../../errors/AppError";
 import httpStatus from 'http-status';
-// import { SSLPaymentInitData } from "../ssl/ssl.interface";
 import SSLCommerz from 'sslcommerz-lts';
 
 
-const store_id = config.ssl.storeId;
-const store_passwd = config.ssl.storePass;
+const store_id = config.ssl.store_id as string;
+const store_passwd = config.ssl.store_pass as string;
 const is_live = false; //true for live and false for sandbox
 
 export const initializePayment = catchAsync(async (req, res) => {
@@ -52,14 +50,14 @@ if (existingPayment) {
   const tran_id = generateTransactionId();
 
   const data= {
-    store_id: config.ssl.storeId,
-    store_passwd: config.ssl.storePass,
+    store_id,
+    store_passwd,
     total_amount: event.fee,
     currency: 'BDT',
     tran_id: tran_id,
-    success_url: `${config.ssl.successUrl}/${tran_id}`,
-    fail_url: `${config.ssl.failUrl}/${tran_id}`,
-    cancel_url: `${config.ssl.cancelUrl}/${tran_id}`,
+    success_url: `${config.ssl.success_url}/${tran_id}`,
+    fail_url: `${config.ssl.fail_url}/${tran_id}`,
+    cancel_url: `${config.ssl.cancel_url}/${tran_id}`,
     ipn_url: 'http://localhost:3030/ipn',
     shipping_method: 'N/A',
     product_name: event.title,
@@ -86,17 +84,17 @@ if (existingPayment) {
 
 
 const sslcz = new SSLCommerz(store_id, store_passwd, is_live);
-  const sslResponse = sslcz.init(data).then(apiResponse => {
-    // Redirect the user to payment gateway
-    const GatewayPageURL = apiResponse.GatewayPageURL
-    if (!GatewayPageURL) {
-      throw new AppError(httpStatus.BAD_REQUEST, "Failed to get SSLCommerz Gateway URL");
-    }
-    res.send({ gateway_url: GatewayPageURL });
-    // console.log('Redirecting to: ', GatewayPageURL)
-});
 
+try {
+  const apiResponse = await sslcz.init(data);
+  const GatewayPageURL = apiResponse.GatewayPageURL;
 
+  if (!GatewayPageURL) {
+    throw new AppError(httpStatus.BAD_GATEWAY, "Failed to generate payment gateway URL.");
+  }
+  res.send({ gateway_url: GatewayPageURL });
+  console.log('Redirecting to: ', GatewayPageURL)
+  
   await prisma.payment.create({
     data: {
       userId,
@@ -107,6 +105,23 @@ const sslcz = new SSLCommerz(store_id, store_passwd, is_live);
       paymentGatewayData: JSON.parse(JSON.stringify(data)),
     },
   });
+
+} catch (error) {
+  console.error("Error initializing SSLCommerz:", error);
+  throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, "An error occurred while processing payment."); 
+}
+
+//   const sslResponse = sslcz.init(data).then(apiResponse => {
+    // Redirect the user to payment gateway
+//     const GatewayPageURL = apiResponse.GatewayPageURL
+//     if (!GatewayPageURL) {
+//       throw new AppError(httpStatus.BAD_REQUEST, "Failed to get SSLCommerz Gateway URL");
+//     }
+//     res.send({ gateway_url: GatewayPageURL });
+    // console.log('Redirecting to: ', GatewayPageURL)
+// });
+
+
   // console.log("Payment record created:", result);
 });
 
@@ -145,11 +160,10 @@ export const paymentSuccess = catchAsync(async (req, res) => {
       },
     });
   
-    res.redirect(`${config.ssl.successUrl}/${tran_id}`);
-    console.log("Payment success:", `${config.ssl.successUrl}/${tran_id}`);
-  });
+    res.redirect(`${config.ssl.success_url}/${tran_id}`);
+    console.log("Payment success:", `${config.ssl.success_url}/${tran_id}`);
+});
   
-
 export const paymentFail = catchAsync(async (req, res) => {
   // const { tran_id } = req.body;
   const { tran_id } = req.params;
@@ -162,8 +176,8 @@ export const paymentFail = catchAsync(async (req, res) => {
     },
   });
 
-  res.redirect(`${config.ssl.failUrl}/${tran_id}`);
-  console.log("Payment failed:", `${config.ssl.failUrl}/${tran_id}`);
+  res.redirect(`${config.ssl.fail_url}/${tran_id}`);
+  console.log("Payment failed:", `${config.ssl.fail_url}/${tran_id}`);
 });
 
 export const paymentCancel = catchAsync(async (req, res) => {
@@ -178,6 +192,6 @@ export const paymentCancel = catchAsync(async (req, res) => {
     },
   });
 
-  res.redirect(`${config.ssl.cancelUrl}/${tran_id}`);
-  console.log("Payment canceled:", `${config.ssl.cancelUrl}/${tran_id}`);
+  res.redirect(`${config.ssl.cancel_url}/${tran_id}`);
+  console.log("Payment canceled:", `${config.ssl.cancel_url}/${tran_id}`);
 });
