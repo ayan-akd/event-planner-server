@@ -145,11 +145,14 @@ const deleteUserFromDB = async (id: string) => {
     throw new AppError(httpStatus.NOT_FOUND, "user not found");
   }
 
-  const result = await prisma.user.delete({
+  const result = await prisma.user.update({
     where: {
       id,
     },
-  });
+    data: {
+      isDeleted: true,
+    },
+  }); 
   return result;
 };
 
