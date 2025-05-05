@@ -1,10 +1,52 @@
 import prisma from "../../../shared/prisma";
 import httpStatus from "http-status";
 import { AppError } from "../../errors/AppError";
-import { User, UserStatus } from "@prisma/client";
+import { Prisma, User, UserStatus } from "@prisma/client";
+import { IPaginationOptions } from "../../interfaces/pagination";
+import { paginationHelper } from "../../../utils/paginationHelper";
+import { UserSearchableFields } from "./user.constant";
 
-const getAllUsersFromDB = async () => {
+const getAllUsersFromDB = async (query: any, options: IPaginationOptions) => {
+  const { searchTerm, ...filteredData } = query;
+  const { page, limit, skip } = paginationHelper.calculatePagination(options);
+  const andCondition: Prisma.UserWhereInput[] = [];
+
+  if (searchTerm) {
+    andCondition.push({
+      OR: UserSearchableFields.map((field) => ({
+        [field]: {
+          contains: searchTerm,
+          mode: "insensitive",
+        },
+      })),
+    });
+  }
+
+  if (Object.keys(filteredData).length > 0) {
+    andCondition.push({
+      AND: Object.keys(filteredData).map((key) => ({
+        [key]: {
+          equals: filteredData[key],
+        },
+      })),
+    });
+  }
+
+  const whereCondition: Prisma.UserWhereInput =
+    andCondition.length > 0 ? { AND: andCondition } : {};
+
   const result = await prisma.user.findMany({
+    where: whereCondition,
+    skip,
+    take: limit,
+    orderBy:
+      options?.sortBy && options?.sortOrder
+        ? {
+            [options?.sortBy]: options?.sortOrder,
+          }
+        : {
+            createdAt: "desc",
+          },
     select: {
       id: true,
       name: true,
@@ -16,9 +58,24 @@ const getAllUsersFromDB = async () => {
       createdAt: true,
       updatedAt: true,
       isDeleted: true,
+      events: true,
+      reviews: true,
+      receivedInvitations: true,
+      payments: true,
     },
   });
-  return result;
+  const total = await prisma.user.count({
+    where: whereCondition,
+  });
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+      totalPage: Math.ceil(total / limit),
+    },
+    result,
+  };
 };
 
 const getSingleUserFromDB = async (id: string) => {
@@ -88,16 +145,18 @@ const deleteUserFromDB = async (id: string) => {
     throw new AppError(httpStatus.NOT_FOUND, "user not found");
   }
 
-  const result = await prisma.user.delete({
+  const result = await prisma.user.update({
     where: {
       id,
     },
-  });
+    data: {
+      isDeleted: true,
+    },
+  }); 
   return result;
 };
 
 const changeUserStatus = async (id: string, status: UserStatus) => {
-
   const isExist = await prisma.user.findUnique({
     where: {
       id,
@@ -107,13 +166,13 @@ const changeUserStatus = async (id: string, status: UserStatus) => {
   if (!isExist) {
     throw new AppError(httpStatus.NOT_FOUND, "user not found");
   }
-  
+
   const result = await prisma.user.update({
     where: {
       id,
     },
     data: {
-      status
+      status,
     },
   });
   return result;
