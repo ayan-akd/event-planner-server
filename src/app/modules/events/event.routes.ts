@@ -39,6 +39,13 @@ eventRouter.delete(
   EventController.hardDeleteEvent
 );
 
+// Admin Hard Delete Any Single Event Route
+eventRouter.delete(
+  "/:eventId/admin",
+  auth(UserRole.ADMIN),
+  EventController.adminHardDeleteAnyEvent
+);
+
 // Soft Delete Single Event Route
 eventRouter.delete(
   "/:eventId/soft",

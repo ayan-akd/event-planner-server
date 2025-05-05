@@ -272,7 +272,11 @@ const getSingleEventsFromToDB = async (
     include: {
       organizer: true,
       invitations: true,
-      participants: true,
+      participants: {
+        include: {
+          user: true,
+        },
+      },
       reviews: true,
     },
   });
@@ -306,6 +310,29 @@ const hardDeleteSingleEventsFromToDB = async (
     where: {
       id: eventId,
       organizerId: authInfo.userId,
+    },
+  });
+  return result;
+};
+
+// Admin Hard Delete Any Single Event From DB
+const adminHardDeleteAnySingleEventsFromToDB = async (
+  eventId: string,
+  authInfo: TUserFromToken
+): Promise<Event | null> => {
+  // check User
+  await prisma.user.findUniqueOrThrow({
+    where: {
+      id: authInfo.userId,
+      isDeleted: false,
+      status: UserStatus.ACTIVE,
+    },
+  });
+
+  // Delete Event
+  const result = await prisma.event.delete({
+    where: {
+      id: eventId,
     },
   });
   return result;
@@ -418,4 +445,5 @@ export const EventService = {
   eventUpdate,
   heroSelectByAdmin,
   getAdminSelectedEventsFromToDB,
+  adminHardDeleteAnySingleEventsFromToDB,
 };
