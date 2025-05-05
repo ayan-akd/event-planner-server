@@ -272,7 +272,11 @@ const getSingleEventsFromToDB = async (
     include: {
       organizer: true,
       invitations: true,
-      participants: true,
+      participants: {
+        include: {
+          user: true,
+        },
+      },
       reviews: true,
     },
   });
