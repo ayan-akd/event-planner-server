@@ -62,7 +62,12 @@ const getSingleInvitation = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const createInvitation = catchAsync(async (req: Request, res: Response) => {
+const createInvitation = catchAsync(async (req: Request & {user? :TUserFromToken}, res: Response) => {
+  const user = req.user;
+  if (!user) {
+    throw new Error("User not found");
+  }
+  req.body.inviterId = user?.userId;
   const result = await InvitationService.createInvitationToDB(req.body);
   sendResponse(res, {
     statusCode: httpStatus.OK,
