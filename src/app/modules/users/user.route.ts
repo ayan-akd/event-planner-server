@@ -13,7 +13,7 @@ router.get(
   UserController.getAllUsers
 );
 
-router.get("/:id", UserController.getSingleUser);
+
 
 router.get(
   "/invite",
@@ -36,5 +36,6 @@ router.patch(
 );
 
 router.delete("/:id", auth(UserRole.ADMIN), UserController.deleteUser);
+router.get("/:id", UserController.getSingleUser);
 
 export const UserRoutes = router;
