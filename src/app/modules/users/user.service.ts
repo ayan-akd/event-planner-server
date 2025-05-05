@@ -36,7 +36,10 @@ const getAllUsersFromDB = async (query: any, options: IPaginationOptions) => {
     andCondition.length > 0 ? { AND: andCondition } : {};
 
   const result = await prisma.user.findMany({
-    where: whereCondition,
+    where: {
+      ...whereCondition,
+      isDeleted: false,
+    },
     skip,
     take: limit,
     orderBy:
