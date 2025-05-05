@@ -66,7 +66,7 @@ model Participant {
   updatedAt DateTime          @updatedAt
   isDeleted Boolean           @default(false)
   user      User              @relation(fields: [userId], references: [id])
-  event     Event             @relation(fields: [eventId], references: [id])
+  event     Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@map("participants")
 }
@@ -83,7 +83,7 @@ model Invitation {
   isDeleted     Boolean          @default(false)
 
   user    User  @relation("InvitationToParticipant", fields: [participantId], references: [id])
-  event   Event @relation(fields: [eventId], references: [id])
+  event   Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
   inviter User  @relation("Inviter", fields: [inviterId], references: [id])
 
   @@map("invitations")
@@ -99,7 +99,7 @@ model Review {
   updatedAt DateTime @updatedAt
   isDeleted Boolean  @default(false)
   user      User     @relation(fields: [userId], references: [id])
-  event     Event    @relation(fields: [eventId], references: [id])
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@map("reviews")
 }
@@ -116,7 +116,7 @@ model Payment {
   updatedAt          DateTime      @updatedAt
   isDeleted          Boolean       @default(false)
   user               User          @relation(fields: [userId], references: [id])
-  event              Event         @relation(fields: [eventId], references: [id])
+  event              Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@map("payments")
 }

@@ -123,6 +123,31 @@ const hardDeleteEvent = catchAsync(
 );
 
 /**
+ * @Description Admin Hard Delete Any Event
+ * @Method DELETE
+ * @Params eventId
+ * @Return Event Data
+ */
+const adminHardDeleteAnyEvent = catchAsync(
+  async (req: Request & { user?: TUserFromToken }, res: Response) => {
+    const { eventId } = req.params;
+    if (!req.user) {
+      throw new Error("User not found");
+    }
+    const result = await EventService.adminHardDeleteAnySingleEventsFromToDB(
+      eventId,
+      req.user
+    );
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Event Deleted successfully",
+      data: result,
+    });
+  }
+);
+
+/**
  * @Description Soft Delete Event
  * @Method DELETE
  * @Params eventId
@@ -223,4 +248,5 @@ export const EventController = {
   updateSingleEvent,
   updateSingleEventHeroStatus,
   getAdminSelectedHeroEvent,
+  adminHardDeleteAnyEvent,
 };

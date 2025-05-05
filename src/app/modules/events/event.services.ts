@@ -315,6 +315,29 @@ const hardDeleteSingleEventsFromToDB = async (
   return result;
 };
 
+// Admin Hard Delete Any Single Event From DB
+const adminHardDeleteAnySingleEventsFromToDB = async (
+  eventId: string,
+  authInfo: TUserFromToken
+): Promise<Event | null> => {
+  // check User
+  await prisma.user.findUniqueOrThrow({
+    where: {
+      id: authInfo.userId,
+      isDeleted: false,
+      status: UserStatus.ACTIVE,
+    },
+  });
+
+  // Delete Event
+  const result = await prisma.event.delete({
+    where: {
+      id: eventId,
+    },
+  });
+  return result;
+};
+
 // Soft Delete Single Event From DB
 const softDeleteSingleEventsFromToDB = async (
   eventId: string,
@@ -422,4 +445,5 @@ export const EventService = {
   eventUpdate,
   heroSelectByAdmin,
   getAdminSelectedEventsFromToDB,
+  adminHardDeleteAnySingleEventsFromToDB,
 };
