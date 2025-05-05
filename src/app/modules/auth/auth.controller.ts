@@ -53,8 +53,8 @@ const getMeController = catchAsync(
 
 const refreshTokenController = catchAsync(
   async (req: Request, res: Response) => {
-    const { refreshToken } = req.cookies;
-    const result = await AuthService.refreshToken(refreshToken);
+    const token = req.headers.authorization;
+    const result = await AuthService.refreshToken(token as string);
     sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,
