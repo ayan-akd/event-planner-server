@@ -8,6 +8,11 @@ const getAllInvitationsFromDB = async () => {
     where: {
       isDeleted: false,
     },
+    include: {
+      inviter: true,
+      event: true,
+      user: true,
+    }
   });
   return result;
 };
@@ -19,6 +24,11 @@ const getPendingMyCreatedInvites = async (userId: string) => {
       status: InvitationStatus.PENDING,
       isDeleted: false,
     },
+    include: {
+      inviter: true,
+      event: true,
+      user: true,
+    }
   });
   return result;
 };
@@ -30,6 +40,11 @@ const getPendingMyReceivedInvites = async (userId: string) => {
       status: InvitationStatus.PENDING,
       isDeleted: false,
     },
+    include: {
+      inviter: true,
+      event: true,
+      user: true,
+    }
   });
   return result;
 };
@@ -40,6 +55,11 @@ const getSingleInvitationFromDB = async (id: string) => {
       id,
       isDeleted: false,
     },
+    include: {
+      inviter: true,
+      event: true,
+      user: true,
+    }
   });
   if (!result) {
     throw new AppError(httpStatus.NOT_FOUND, "invitation not found");
