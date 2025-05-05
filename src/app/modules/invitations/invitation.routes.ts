@@ -19,6 +19,18 @@ router.get(
   InvitationController.getSingleInvitation
 );
 
+router.get(
+  "/my-created-invites",
+  auth(UserRole.USER),
+  InvitationController.getPendingMyCreatedInvites
+);
+
+router.get(
+  "/my-received-invites",
+  auth(UserRole.USER),
+  InvitationController.getPendingMyReceivedInvites
+);
+
 router.post(
   "/",
   auth(UserRole.ADMIN, UserRole.USER),

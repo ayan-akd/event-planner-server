@@ -3,6 +3,7 @@ import catchAsync from "../../../utils/catchAsync";
 import sendResponse from "../../../utils/sendResponse";
 import httpStatus from "http-status";
 import { InvitationService } from "./invitation.service";
+import { TUserFromToken } from "../users/user.interface";
 
 const getAllInvitations = catchAsync(async (req: Request, res: Response) => {
   const result = await InvitationService.getAllInvitationsFromDB();
@@ -13,6 +14,42 @@ const getAllInvitations = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
+const getPendingMyCreatedInvites = catchAsync(
+  async (req: Request & { user?: TUserFromToken }, res: Response) => {
+    const user = req.user;
+    if (!user) {
+      throw new Error("User not found");
+    }
+    const result = await InvitationService.getPendingMyCreatedInvites(
+      user?.userId
+    );
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Invitations fetched successfully",
+      data: result,
+    });
+  }
+);
+
+const getPendingMyReceivedInvites = catchAsync(
+  async (req: Request & { user?: TUserFromToken }, res: Response) => {
+    const user = req.user;
+    if (!user) {
+      throw new Error("User not found");
+    }
+    const result = await InvitationService.getPendingMyReceivedInvites(
+      user?.userId
+    );
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Invitations fetched successfully",
+      data: result,
+    });
+  }
+);
 
 const getSingleInvitation = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
@@ -59,6 +96,8 @@ const deleteInvitation = catchAsync(async (req: Request, res: Response) => {
 
 export const InvitationController = {
   getAllInvitations,
+  getPendingMyCreatedInvites,
+  getPendingMyReceivedInvites,
   getSingleInvitation,
   createInvitation,
   updateInvitation,
