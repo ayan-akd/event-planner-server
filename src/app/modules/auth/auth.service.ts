@@ -25,12 +25,14 @@ const logIn = async (payload: { email: string; password: string }) => {
   const isUserExist = await prisma.user.findUnique({
     where: {
       email,
-      status: UserStatus.ACTIVE,
       isDeleted: false,
     },
   });
   if (!isUserExist) {
     throw new Error("User does not exist");
+  }
+  if (isUserExist.status === UserStatus.BLOCKED) {
+    throw new Error("Your account is blocked");
   }
   const isPasswordMatched = await bcrypt.compare(
     password,
