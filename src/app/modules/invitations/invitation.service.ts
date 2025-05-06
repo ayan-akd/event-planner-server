@@ -12,7 +12,7 @@ const getAllInvitationsFromDB = async () => {
       inviter: true,
       event: true,
       user: true,
-    }
+    },
   });
   return result;
 };
@@ -28,7 +28,7 @@ const getPendingMyCreatedInvites = async (userId: string) => {
       inviter: true,
       event: true,
       user: true,
-    }
+    },
   });
   return result;
 };
@@ -44,9 +44,24 @@ const getPendingMyReceivedInvites = async (userId: string) => {
       inviter: true,
       event: true,
       user: true,
-    }
+    },
   });
   return result;
+};
+
+const getNotificationCount = async (userId: string) => {
+  const result = await prisma.invitation.aggregate({
+    where: {
+      participantId: userId,
+      status: InvitationStatus.PENDING,
+      isDeleted: false,
+      hasRead: false,
+    },
+    _count: {
+      id: true,
+    },
+  });
+  return result._count;
 };
 
 const getSingleInvitationFromDB = async (id: string) => {
@@ -59,7 +74,7 @@ const getSingleInvitationFromDB = async (id: string) => {
       inviter: true,
       event: true,
       user: true,
-    }
+    },
   });
   if (!result) {
     throw new AppError(httpStatus.NOT_FOUND, "invitation not found");
@@ -201,4 +216,5 @@ export const InvitationService = {
   createInvitationToDB,
   updateInvitationToDB,
   deleteInvitationFromDB,
+  getNotificationCount,
 };

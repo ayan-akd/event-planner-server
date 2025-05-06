@@ -13,7 +13,11 @@ router.get(
   InvitationController.getAllInvitations
 );
 
-
+router.get(
+  "/notifications",
+  auth(UserRole.USER),
+  InvitationController.getNotificationCount
+);
 
 router.get(
   "/my-created-invites",
