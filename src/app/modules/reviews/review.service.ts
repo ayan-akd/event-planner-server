@@ -8,6 +8,10 @@ const getAllReviewsFromDB = async () => {
     where: {
       isDeleted: false,
     },
+    include: {
+      user: true,
+      event: true,
+    },
   });
   return result;
 };
