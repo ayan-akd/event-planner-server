@@ -55,10 +55,10 @@ if (existingPayment) {
     total_amount: event.fee,
     currency: 'BDT',
     tran_id: tran_id,
-    success_url: `${config.ssl.success_url}/${tran_id}`,
-    fail_url: `${config.ssl.fail_url}/${tran_id}`,
-    cancel_url: `${config.ssl.cancel_url}/${tran_id}`,
-    ipn_url: 'http://localhost:3030/ipn',
+    success_url: `http://localhost:3000/payment/success/${tran_id}`,
+    fail_url: `http://localhost:3000/payment/failed/${tran_id}`,
+    cancel_url: `http://localhost:3000/payment/canceled/${tran_id}`,
+    ipn_url: 'http://localhost:3000/ipn',
     shipping_method: 'N/A',
     product_name: event.title,
     product_category: 'Event',
@@ -160,8 +160,7 @@ export const paymentSuccess = catchAsync(async (req, res) => {
       },
     });
   
-    res.redirect(`${config.ssl.success_url}/${tran_id}`);
-    console.log("Payment success:", `${config.ssl.success_url}/${tran_id}`);
+    res.redirect(`http://localhost:3000/payment/success/${tran_id}`);
 });
   
 export const paymentFail = catchAsync(async (req, res) => {
@@ -176,8 +175,7 @@ export const paymentFail = catchAsync(async (req, res) => {
     },
   });
 
-  res.redirect(`${config.ssl.fail_url}/${tran_id}`);
-  console.log("Payment failed:", `${config.ssl.fail_url}/${tran_id}`);
+  res.redirect(`http://localhost:3000/payment/failed/${tran_id}`);
 });
 
 export const paymentCancel = catchAsync(async (req, res) => {
@@ -192,6 +190,5 @@ export const paymentCancel = catchAsync(async (req, res) => {
     },
   });
 
-  res.redirect(`${config.ssl.cancel_url}/${tran_id}`);
-  console.log("Payment canceled:", `${config.ssl.cancel_url}/${tran_id}`);
+  res.redirect(`http://localhost:3000/payment/canceled/${tran_id}`);
 });

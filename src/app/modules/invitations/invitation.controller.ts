@@ -51,6 +51,22 @@ const getPendingMyReceivedInvites = catchAsync(
   }
 );
 
+const getNotificationCount = catchAsync(
+  async (req: Request & { user?: TUserFromToken }, res: Response) => {
+    const user = req.user;
+    if (!user) {
+      throw new Error("User not found");
+    }
+    const result = await InvitationService.getNotificationCount(user?.userId);
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Notification count fetched successfully",
+      data: result,
+    });
+  }
+);
+
 const getSingleInvitation = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const result = await InvitationService.getSingleInvitationFromDB(id);
@@ -107,4 +123,5 @@ export const InvitationController = {
   createInvitation,
   updateInvitation,
   deleteInvitation,
+  getNotificationCount,
 };
