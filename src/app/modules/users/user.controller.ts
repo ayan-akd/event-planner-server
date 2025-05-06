@@ -5,23 +5,19 @@ import httpStatus from "http-status";
 import { UserService } from "./user.service";
 import pick from "../../../utils/pick";
 import { UserFilterableFields } from "./user.constant";
+import { TUserFromToken } from "./user.interface";
 
-const getAllUsers = catchAsync(
-  async (req: Request, res: Response) => {
-    const filters = pick(req.query, [...UserFilterableFields, 'searchTerm']);
-    const options = pick(req.query, ["page", "limit", "sortBy", "sortOrder"]);
-    const result = await UserService.getAllUsersFromDB(
-      filters,
-      options
-    );
-    sendResponse(res, {
-      statusCode: httpStatus.OK,
-      success: true,
-      message: "Users fetched successfully",
-      data: result,
-    });
-  }
-);
+const getAllUsers = catchAsync(async (req: Request, res: Response) => {
+  const filters = pick(req.query, [...UserFilterableFields, "searchTerm"]);
+  const options = pick(req.query, ["page", "limit", "sortBy", "sortOrder"]);
+  const result = await UserService.getAllUsersFromDB(filters, options);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Users fetched successfully",
+    data: result,
+  });
+});
 
 const getSingleUser = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
@@ -33,6 +29,22 @@ const getSingleUser = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
+const getUsersForInvitation = catchAsync(
+  async (req: Request & {user?: TUserFromToken}, res: Response) => {
+    const user = req.user;
+    if(!user) {
+      throw new Error("User not found");
+    }
+    const result = await UserService.getUsersForInvitation(user.userId);
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Users fetched successfully",
+      data: result,
+    });
+  }
+);
 
 const updateUser = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
@@ -70,6 +82,7 @@ const changeUserStatus = catchAsync(async (req: Request, res: Response) => {
 export const UserController = {
   getAllUsers,
   getSingleUser,
+  getUsersForInvitation,
   updateUser,
   deleteUser,
   changeUserStatus,

@@ -36,7 +36,10 @@ const getAllUsersFromDB = async (query: any, options: IPaginationOptions) => {
     andCondition.length > 0 ? { AND: andCondition } : {};
 
   const result = await prisma.user.findMany({
-    where: whereCondition,
+    where: {
+      ...whereCondition,
+      isDeleted: false,
+    },
     skip,
     take: limit,
     orderBy:
@@ -76,6 +79,31 @@ const getAllUsersFromDB = async (query: any, options: IPaginationOptions) => {
     },
     result,
   };
+};
+
+const getUsersForInvitation = async (userId: string) => {
+  const result = await prisma.user.findMany({
+    where: {
+      id: {
+        not: userId,
+      },
+      isDeleted: false,
+      role: "USER",
+    },
+    select: {
+      id: true,
+      name: true,
+      username: true,
+      email: true,
+      profileImage: true,
+      role: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+      isDeleted: true,
+    },
+  });
+  return result;
 };
 
 const getSingleUserFromDB = async (id: string) => {
@@ -181,6 +209,7 @@ const changeUserStatus = async (id: string, status: UserStatus) => {
 export const UserService = {
   getAllUsersFromDB,
   getSingleUserFromDB,
+  getUsersForInvitation,
   updateUserIntoDB,
   deleteUserFromDB,
   changeUserStatus,

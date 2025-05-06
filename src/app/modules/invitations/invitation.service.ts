@@ -8,6 +8,43 @@ const getAllInvitationsFromDB = async () => {
     where: {
       isDeleted: false,
     },
+    include: {
+      inviter: true,
+      event: true,
+      user: true,
+    }
+  });
+  return result;
+};
+
+const getPendingMyCreatedInvites = async (userId: string) => {
+  const result = await prisma.invitation.findMany({
+    where: {
+      inviterId: userId,
+      status: InvitationStatus.PENDING,
+      isDeleted: false,
+    },
+    include: {
+      inviter: true,
+      event: true,
+      user: true,
+    }
+  });
+  return result;
+};
+
+const getPendingMyReceivedInvites = async (userId: string) => {
+  const result = await prisma.invitation.findMany({
+    where: {
+      participantId: userId,
+      status: InvitationStatus.PENDING,
+      isDeleted: false,
+    },
+    include: {
+      inviter: true,
+      event: true,
+      user: true,
+    }
   });
   return result;
 };
@@ -18,6 +55,11 @@ const getSingleInvitationFromDB = async (id: string) => {
       id,
       isDeleted: false,
     },
+    include: {
+      inviter: true,
+      event: true,
+      user: true,
+    }
   });
   if (!result) {
     throw new AppError(httpStatus.NOT_FOUND, "invitation not found");
@@ -87,7 +129,7 @@ const updateInvitationToDB = async (
   if (payload.status === InvitationStatus.ACCEPTED) {
     await prisma.$transaction(async (tx) => {
       //update invitation status to accepted
-      const invitation =await tx.invitation.update({
+      const invitation = await tx.invitation.update({
         where: {
           id,
         },
@@ -110,16 +152,16 @@ const updateInvitationToDB = async (
     });
   }
   if (payload.status === InvitationStatus.REJECTED) {
-      const result = await prisma.invitation.update({
-        where: {
-          id,
-        },
-        data: {
-          status: InvitationStatus.REJECTED,
-          hasRead: true,
-        },
-      });
-      return result;
+    const result = await prisma.invitation.update({
+      where: {
+        id,
+      },
+      data: {
+        status: InvitationStatus.REJECTED,
+        hasRead: true,
+      },
+    });
+    return result;
   }
 
   const result = await prisma.invitation.update({
@@ -153,6 +195,8 @@ const deleteInvitationFromDB = async (id: string) => {
 
 export const InvitationService = {
   getAllInvitationsFromDB,
+  getPendingMyCreatedInvites,
+  getPendingMyReceivedInvites,
   getSingleInvitationFromDB,
   createInvitationToDB,
   updateInvitationToDB,

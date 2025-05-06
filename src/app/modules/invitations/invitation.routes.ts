@@ -13,15 +13,23 @@ router.get(
   InvitationController.getAllInvitations
 );
 
+
+
 router.get(
-  "/:id",
-  auth(UserRole.ADMIN, UserRole.USER),
-  InvitationController.getSingleInvitation
+  "/my-created-invites",
+  auth(UserRole.USER),
+  InvitationController.getPendingMyCreatedInvites
+);
+
+router.get(
+  "/my-received-invites",
+  auth(UserRole.USER),
+  InvitationController.getPendingMyReceivedInvites
 );
 
 router.post(
   "/",
-  auth(UserRole.ADMIN, UserRole.USER),
+  auth(UserRole.USER),
   validateRequest(InvitationValidation.createInvitationZodSchema),
   InvitationController.createInvitation
 );
@@ -37,6 +45,12 @@ router.delete(
   "/delete/:id",
   auth(UserRole.ADMIN, UserRole.USER),
   InvitationController.deleteInvitation
+);
+
+router.get(
+  "/:id",
+  auth(UserRole.ADMIN, UserRole.USER),
+  InvitationController.getSingleInvitation
 );
 
 export const InvitationRoutes = router;

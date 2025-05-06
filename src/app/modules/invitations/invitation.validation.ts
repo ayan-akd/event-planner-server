@@ -8,9 +8,6 @@ const createInvitationZodSchema = z.object({
     eventId: z.string({
       required_error: "eventId is required",
     }),
-    inviterId: z.string({
-      required_error: "inviterId is required",
-    }),
   }),
 });
 
