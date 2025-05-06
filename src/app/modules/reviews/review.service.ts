@@ -12,6 +12,21 @@ const getAllReviewsFromDB = async () => {
   return result;
 };
 
+//  Get Specific Reviews for a specific event
+const getSpecificReviewsForSpecificEventFromDB = async (eventId: string) => {
+  const result = await prisma.review.findMany({
+    where: {
+      eventId,
+      isDeleted: false,
+    },
+    include: {
+      user: true,
+      event: true,
+    },
+  });
+  return result;
+};
+
 const getSingleReviewFromDB = async (id: string) => {
   const result = await prisma.review.findUnique({
     where: {
@@ -120,4 +135,5 @@ export const ReviewService = {
   createReviewToDB,
   deleteReviewFromDB,
   updateReviewToDB,
+  getSpecificReviewsForSpecificEventFromDB,
 };
