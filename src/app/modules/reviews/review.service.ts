@@ -3,9 +3,10 @@ import prisma from "../../../shared/prisma";
 import { AppError } from "../../errors/AppError";
 import httpStatus from "http-status";
 
-const getAllReviewsFromDB = async () => {
+const getAllReviewsFromDB = async (userId: string) => {
   const result = await prisma.review.findMany({
     where: {
+      userId,
       isDeleted: false,
     },
     include: {

@@ -7,7 +7,11 @@ import { ReviewValidation } from "./review.validation";
 
 const router = Router();
 
-router.get("/", ReviewController.getAllReviews);
+router.get(
+  "/",
+  auth(UserRole.USER, UserRole.ADMIN),
+  ReviewController.getAllReviews
+);
 router.get(
   "/specific-event/:eventId",
   ReviewController.getAllReviewsForSpecificEvent
