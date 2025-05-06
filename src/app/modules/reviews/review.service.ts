@@ -17,6 +17,18 @@ const getAllReviewsFromDB = async (userId: string) => {
   return result;
 };
 
+const getAllReviewsForAdminFromDB = async () => {
+  const result = await prisma.review.findMany({
+    where: {
+      isDeleted: false,
+    },
+    include: {
+      user: true,
+      event: true,
+    },
+  });
+  return result;
+};
 //  Get Specific Reviews for a specific event
 const getSpecificReviewsForSpecificEventFromDB = async (eventId: string) => {
   const result = await prisma.review.findMany({
@@ -141,4 +153,5 @@ export const ReviewService = {
   deleteReviewFromDB,
   updateReviewToDB,
   getSpecificReviewsForSpecificEventFromDB,
+  getAllReviewsForAdminFromDB,
 };

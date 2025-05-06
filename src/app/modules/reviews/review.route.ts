@@ -13,6 +13,11 @@ router.get(
   ReviewController.getAllReviews
 );
 router.get(
+  "/admin",
+  auth(UserRole.ADMIN),
+  ReviewController.getAllReviewsForAdmin
+);
+router.get(
   "/specific-event/:eventId",
   ReviewController.getAllReviewsForSpecificEvent
 );
@@ -26,11 +31,11 @@ router.post(
   ReviewController.createReview
 );
 
-router.patch("/:id", auth(UserRole.ADMIN), ReviewController.updateReview);
+router.patch("/:id", auth(UserRole.USER), ReviewController.updateReview);
 
 router.patch(
   "/delete/:id",
-  auth(UserRole.ADMIN),
+  auth(UserRole.ADMIN, UserRole.USER),
   ReviewController.deleteReview
 );
 

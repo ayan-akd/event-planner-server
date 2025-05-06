@@ -22,6 +22,21 @@ const getAllReviews = catchAsync(
   }
 );
 
+const getAllReviewsForAdmin = catchAsync(
+  async (req: Request & { user?: TUserFromToken }, res: Response) => {
+    if (!req.user) {
+      throw new Error("User not found");
+    }
+    const result = await ReviewService.getAllReviewsForAdminFromDB();
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Reviews fetched successfully",
+      data: result,
+    });
+  }
+);
+
 const getAllReviewsForSpecificEvent = catchAsync(
   async (req: Request, res: Response) => {
     const result = await ReviewService.getSpecificReviewsForSpecificEventFromDB(
@@ -86,4 +101,5 @@ export const ReviewController = {
   updateReview,
   deleteReview,
   getAllReviewsForSpecificEvent,
+  getAllReviewsForAdmin,
 };
