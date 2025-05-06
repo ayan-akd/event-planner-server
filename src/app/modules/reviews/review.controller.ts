@@ -14,6 +14,20 @@ const getAllReviews = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getAllReviewsForSpecificEvent = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await ReviewService.getSpecificReviewsForSpecificEventFromDB(
+      req.params.eventId
+    );
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Reviews fetched successfully",
+      data: result,
+    });
+  }
+);
+
 const getSingleReview = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const result = await ReviewService.getSingleReviewFromDB(id);
@@ -63,4 +77,5 @@ export const ReviewController = {
   createReview,
   updateReview,
   deleteReview,
+  getAllReviewsForSpecificEvent,
 };

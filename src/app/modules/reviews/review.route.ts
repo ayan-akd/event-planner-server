@@ -8,6 +8,10 @@ import { ReviewValidation } from "./review.validation";
 const router = Router();
 
 router.get("/", ReviewController.getAllReviews);
+router.get(
+  "/specific-event/:eventId",
+  ReviewController.getAllReviewsForSpecificEvent
+);
 
 router.get("/:id", ReviewController.getSingleReview);
 
@@ -20,6 +24,10 @@ router.post(
 
 router.patch("/:id", auth(UserRole.ADMIN), ReviewController.updateReview);
 
-router.patch("/delete/:id", auth(UserRole.ADMIN), ReviewController.deleteReview);
+router.patch(
+  "/delete/:id",
+  auth(UserRole.ADMIN),
+  ReviewController.deleteReview
+);
 
 export const ReviewRoutes = router;
