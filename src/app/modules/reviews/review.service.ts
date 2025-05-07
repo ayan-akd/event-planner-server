@@ -2,16 +2,34 @@ import { Review } from "@prisma/client";
 import prisma from "../../../shared/prisma";
 import { AppError } from "../../errors/AppError";
 import httpStatus from "http-status";
+import { differenceInHours } from "date-fns";
 
-const getAllReviewsFromDB = async () => {
+const getAllReviewsFromDB = async (userId: string) => {
   const result = await prisma.review.findMany({
     where: {
+      userId,
       isDeleted: false,
+    },
+    include: {
+      user: true,
+      event: true,
     },
   });
   return result;
 };
 
+const getAllReviewsForAdminFromDB = async () => {
+  const result = await prisma.review.findMany({
+    where: {
+      isDeleted: false,
+    },
+    include: {
+      user: true,
+      event: true,
+    },
+  });
+  return result;
+};
 //  Get Specific Reviews for a specific event
 const getSpecificReviewsForSpecificEventFromDB = async (eventId: string) => {
   const result = await prisma.review.findMany({
@@ -101,6 +119,16 @@ const updateReviewToDB = async (id: string, payload: Partial<Review>) => {
   if (!isExist) {
     throw new AppError(httpStatus.NOT_FOUND, "review not found");
   }
+
+  const createdAT = new Date(isExist.createdAt);
+  const now = new Date();
+  const hoursDiff = differenceInHours(now, createdAT);
+  if (hoursDiff >= 1) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "You can't update the review after 1 hour"
+    );
+  }
   const result = await prisma.review.update({
     where: {
       id,
@@ -136,4 +164,5 @@ export const ReviewService = {
   deleteReviewFromDB,
   updateReviewToDB,
   getSpecificReviewsForSpecificEventFromDB,
+  getAllReviewsForAdminFromDB,
 };
