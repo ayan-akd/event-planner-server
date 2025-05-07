@@ -8,35 +8,50 @@ import { UserRole } from "@prisma/client";
 const router = Router();
 
 router.post(
-    "/create-participant",
-    // auth(UserRole.ADMIN, UserRole.USER),
-    validateRequest(ParticipantValidation.createParticipantSchema),
-    ParticipantControllers.createParticipant
-    );
+  "/create-participant",
+  // auth(UserRole.ADMIN, UserRole.USER),
+  validateRequest(ParticipantValidation.createParticipantSchema),
+  ParticipantControllers.createParticipant
+);
 
-router.get("/",
-    auth(UserRole.USER, UserRole.ADMIN),
-    ParticipantControllers.getAllParticipants);
+// Verify Payment
+router.get(
+  "/verify",
+  auth(UserRole.ADMIN, UserRole.USER),
+  ParticipantControllers.ParticipantPaymentVerify
+);
 
-router.get("/:id",
-    auth(UserRole.USER, UserRole.ADMIN),
-    ParticipantControllers.getSingleParticipant);
+router.get(
+  "/",
+  auth(UserRole.USER, UserRole.ADMIN),
+  ParticipantControllers.getAllParticipants
+);
+
+router.get(
+  "/:id",
+  auth(UserRole.USER, UserRole.ADMIN),
+  ParticipantControllers.getSingleParticipant
+);
 
 router.patch(
   "/:id",
-    auth(UserRole.USER, UserRole.ADMIN),
+  auth(UserRole.USER, UserRole.ADMIN),
   validateRequest(ParticipantValidation.updateParticipantSchema),
   ParticipantControllers.updateParticipant
 );
 
 // hard delete
-router.delete("/:id",
-    auth(UserRole.ADMIN),
-    ParticipantControllers.deleteParticipant);
+router.delete(
+  "/:id",
+  auth(UserRole.ADMIN),
+  ParticipantControllers.deleteParticipant
+);
 
 // soft delete
-router.patch("/:id",
-    auth(UserRole.ADMIN),
-    ParticipantControllers.deleteWithUpdateParticipant);
+router.patch(
+  "/:id",
+  auth(UserRole.ADMIN),
+  ParticipantControllers.deleteWithUpdateParticipant
+);
 
 export const ParticipantRoutes = router;
