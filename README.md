@@ -1,89 +1,255 @@
+# Evenzo Backend API
 
-# Event Planner Server
 
-A robust backend server for the Event Planner application that handles event management, user authentication, and booking services.
+## 📝 Overview
 
-## Features
+Evenzo Backend is a RESTful API service built with Node.js, Express, and Prisma ORM that powers the Evenzo Event Planning & Participation System. This API handles authentication, event management, participant control, and payment processing via SSLCommerz integration.
 
-- User authentication and authorization
-- Event creation, management, and booking
-- Payment processing integration
-- Admin dashboard for event oversight
-- Review and rating system
-- Email notifications for bookings and updates
+## 🚀 Live API
 
-## Tech Stack
+- Backend API: [Evenzo Backend](https://event-planner-server-virid.vercel.app)
+- Frontend: [Evenzo Frontend](https://evenzo.vercel.app)
 
-- Node.js
-- Express.js
-- MongoDB
-- JWT for authentication
-- Stripe for payment processing
-- Nodemailer for email services
 
-## Installation
+## ✨ Key Features
 
-1. Clone the repository:
+- **Authentication System**
+  - JWT-based secure authentication
+  - Role-based access control (User/Admin)
+  
+- **Event Management**
+  - CRUD operations for events
+  - Public/Private event visibility settings
+  - Registration fee implementation
+  
+- **User Management**
+  - User registration and profile management
+  - Admin dashboard for user monitoring
+  
+- **Participation System**
+  - Join requests handling
+  - Invitation system
+  - Participant approval workflow
+  
+- **Payment Integration**
+  - SSLCommerz payment gateway integration
+  - Payment verification and status tracking
+  
+- **Security**
+  - Input validation and sanitization
+  - Rate limiting for API endpoints
+  - Secure headers implementation
+
+## 🔧 Tech Stack
+
+- **Runtime:** Node.js
+- **Framework:** Express.js
+- **Database:** PostgreSQL on Supabase
+- **ORM:** Prisma
+- **Authentication:** JWT
+- **Payment:** SSLCommerz
+- **Validation:** Zod
+- **Deployment:** Vercel
+
+## 📋 Prerequisites
+
+- Node.js (version 18 or higher)
+- PostgreSQL database
+- SSLCommerz merchant account
+- npm or yarn
+
+## 🛠️ Installation & Setup
+
+1. **Clone the repository**
+
 ```bash
-git clone https://github.com/ayan-akd/event-planner-server.git
-```
-
-2. Navigate to the project directory:
-```bash
+git clone https://github.com/ayan-akd/event-planner-server
 cd event-planner-server
 ```
 
-3. Install dependencies:
+2. **Install dependencies**
+
 ```bash
 npm install
+# or
+yarn install
+# or
+bun install
 ```
 
-4. Create a `.env` file in the root directory with the following variables:
+3. **Environment Setup**
+
+Create a `.env` file in the root directory with the following variables:
+
 ```
+# Application
 PORT=5000
-MONGODB_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
-STRIPE_SECRET_KEY=your_stripe_secret_key
-EMAIL_USER=your_email_address
-EMAIL_PASS=your_email_password
+NODE_ENV=development
+
+# Database
+DATABASE_URL= <your_database_url>
+DIRECT_URL= <your_direct_url_from_supabase>
+ENABLE_PRISMA_CACHING=false
+
+# Authentication
+JWT_SECRET=your_secret_jwt_key
+JWT_EXPIRES_IN=7d
+REFRESH_TOKEN_SECRET=your_refresh_token_secret
+REFRESH_TOKEN_EXPIRES_IN=7d
+
+# SSLCommerz
+STORE_ID=your_sslcommerz_store_id
+STORE_PASS=your_sslcommerz_store_password
+SUCCESS_URL=your_success_url
+FAIL_URL=your_fail_url
+CANCEL_URL=your_cancel_url
+SSL_PAYMENT_API=https://sandbox.sslcommerz.com/gwprocess/v4/api.php
+SSL_VALIDATION_API=https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php
 ```
 
-5. Start the development server:
+4. **Database Setup**
+
+```bash
+npx prisma migrate dev --name init
+# Seeds the database with initial data
+npx prisma db seed
+```
+
+5. **Run the development server**
+
 ```bash
 npm run dev
+# or
+yarn dev
 ```
 
-## API Endpoints
+6. **Build for production**
+
+```bash
+npm run build
+# or
+yarn build
+```
+
+
+## 🌐 API Endpoints
 
 ### Authentication
-- `POST /api/auth/register` - Register a new user
-- `POST /api/auth/login` - Login user
-- `GET /api/auth/me` - Get current user
+- `POST /api/auth/sign-up` - User registration
+- `POST /api/auth/sign-in` - User login
+- `GET /api/auth/me` - Get current user info
+- `POST /api/auth/refresh-token` - Refresh access token
+- `POST /api/auth/change-password` - Change user password
+
+### Users
+- `GET /api/users` - Get all users
+- `GET /api/users/:id` - Get user details
+- `GET /api/users/invite` - Get users that can be invited
+- `PATCH /api/users/:id` - Update user profile
+- `PATCH /api/users/change-status/:id` - Update user status
+- `DELETE /api/users/:id` - Delete user
 
 ### Events
-- `GET /api/events` - Get all events
-- `GET /api/events/:id` - Get event by ID
-- `POST /api/events` - Create a new event (Admin only)
-- `PUT /api/events/:id` - Update an event (Admin only)
-- `DELETE /api/events/:id` - Delete an event (Admin only)
+- `GET /api/events` - Get all events with filters
+- `GET /api/events/:id` - Get event details
+- `GET /api/events/hero-event` - Get hero event
+- `GET /api/events/my-events` - Get user's events
+- `POST /api/events/create` - Create new event
+- `PATCH /api/events/:id` - Update event
+- `PATCH /api/events/:id/hero` - Update hero event
+- `DELETE /api/events/:id` - Hard delete event
+- `DELETE /api/events/:id/admin` - Hard delete event by admin
+- `DELETE /api/events/:id/soft` - Soft delete event
 
-### Bookings
-- `GET /api/bookings` - Get all bookings for current user
-- `POST /api/bookings` - Create a new booking
-- `GET /api/bookings/:id` - Get booking details
-- `DELETE /api/bookings/:id` - Cancel a booking
+### Participation
+- `GET /api/participants` - Get all participants
+- `POST /api/participants/create-participant` - Join or request to join an event
+- `GET /api/participants/:id` - Get participant details
+- `PATCH /api/participants/:id` - Approve/reject participant
+- `DELETE /api/participants/:id` - Remove participant
+
+### Invitations
+- `GET /api/invitations` - Get all invitations
+- `GET /api/invitations/:id` - Get invitation details
+- `GET /api/invitations/notifications` - Get notifications count
+- `GET /api/invitations/my-created-invites` - Get created invitations
+- `GET /api/invitations/my-received-invites` - Get received invitations
+- `POST /api/invitations` - Send invitation
+- `GET /api/invitations/received` - Get received invitations
+- `PATCH /api/invitations/:id` - Accept/decline invitation
+- `DELETE /api/invitations/delete/:id` - Delete invitation
 
 ### Reviews
-- `GET /api/reviews/:eventId` - Get all reviews for an event
-- `POST /api/reviews` - Add a review for an event
-- `PUT /api/reviews/:id` - Update a review
-- `DELETE /api/reviews/:id` - Delete a review
+- `GET /api/reviews` - Get all reviews
+- `GET /api/reviews/admin` - Get all reviews for admin
+- `GET /api/reviews/:id` - Get review details
+- `GET /api/reviews/specific-event/:id` - Get reviews for a specific event
+- `POST /api/reviews` - Create review
+- `PATCH /api/reviews/:id` - Update review
+- `PATCH /api/reviews/delete/:id` - Delete review
 
-## Deployment
+### Payments
+- `POST /api/payment/init` - Initialize payment
+- `POST /api/payment/success/:id` - Payment success callback
+- `POST /api/payment/fail/:id` - Payment failure callback
+- `POST /api/payment/cancel/:id` - Payment cancellation callback
 
-The server is deployed on [Vercel/Heroku/etc]. You can access the live API at [API URL].
+### Admin
+- `GET /api/admin/events` - Get all events (admin)
+- `GET /api/admin/users` - Get all users (admin)
+- `PUT /api/admin/events/:id` - Update event status (admin)
+- `DELETE /api/admin/users/:id` - Delete user (admin)
 
-## Contributing
+## 💳 SSLCommerz Integration
+
+Evenzo uses SSLCommerz for processing payments:
+
+1. When a user attempts to join a paid event, the API initiates a payment session with SSLCommerz
+2. User completes payment on the SSLCommerz gateway
+3. SSLCommerz redirects to success/failure endpoints
+4. Backend verifies transaction via IPN and validation API
+5. Upon successful verification, user's participation status is updated
+
+
+## 📊 Database Schema
+
+### Core Tables
+- **users** - User accounts and profiles
+- **events** - Created events with details
+- **participants** - Event participation records
+- **invitations** - Event invitations
+- **reviews** - Event reviews
+- **payments** - Payment records and statuses
+
+### Prisma Schema
+
+The complete database schema is defined in `prisma/schema.prisma`.
+
+## 🔒 Authentication & Security
+
+- JWT tokens are used for authentication
+- Passwords are hashed using bcrypt
+- API endpoints have role-based access control
+- Input validation prevents common attacks
+
+
+## 🐞 Troubleshooting
+
+- **Database Connection Issues**: Verify DATABASE_URL in .env file
+- **Payment Gateway Errors**: Check SSLCommerz credentials and test mode settings
+- **JWT Errors**: Ensure JWT_SECRET is properly set
+
+## 🚀 Deployment
+
+### Render Deployment
+
+1. Create a new Web Service on Render or Supabase
+2. Connect your GitHub repository
+3. Set environment variables from your .env file
+4. Set build command: `npm install && npx prisma generate && npm run build`
+5. Set start command: `npm start`
+
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
@@ -91,12 +257,19 @@ The server is deployed on [Vercel/Heroku/etc]. You can access the live API at [A
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## License
+## 🔗 Related Projects
+- [Evenzo-frontend](https://github.com/ayan-akd/event-planner-client): Frontend repository.
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+## 👥 Collaborators
+- [Ayan Kumar Das](https://github.com/ayan-akd)
+- [Hammad Sadi](https://github.com/hammadsadi)
+- [Md. Zakaria Hossain](https://github.com/Zakaria-24)
 
-## Contact
 
-Ayan - [your-email@example.com](mailto:your-email@example.com)
+## 📄 License
 
-Project Link: [https://github.com/ayan-akd/event-planner-server](https://github.com/ayan-akd/event-planner-server)
+This project is licensed under the MIT License - see the LICENSE file for details
+
+## 📬 Contact
+
+For any inquiries or issues, please contact us at support@evenzo.com
