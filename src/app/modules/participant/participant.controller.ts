@@ -50,6 +50,21 @@ const getAllParticipants = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// Get All Participants for Logged In User
+const getParticipantsForLoggedInUser = catchAsync(
+  async (req: Request & { user?: TUserFromToken }, res: Response) => {
+    const result = await ParticipantServices.getParticipantsForLoggedInUser(
+      req.user?.userId as string
+    );
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Participants fetched successfully",
+      data: result,
+    });
+  }
+);
+
 const getSingleParticipant = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const result = await ParticipantServices.getSingleParticipantFromDB(id);
@@ -109,4 +124,5 @@ export const ParticipantControllers = {
   deleteParticipant,
   deleteWithUpdateParticipant,
   ParticipantPaymentVerify,
+  getParticipantsForLoggedInUser,
 };

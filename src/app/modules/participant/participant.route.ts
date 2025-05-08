@@ -27,6 +27,13 @@ router.get(
   ParticipantControllers.getAllParticipants
 );
 
+// Get All Participants for Logged In User
+router.get(
+  "/my-participants",
+  auth(UserRole.USER, UserRole.ADMIN),
+  ParticipantControllers.getParticipantsForLoggedInUser
+);
+
 router.get(
   "/:id",
   auth(UserRole.USER, UserRole.ADMIN),
