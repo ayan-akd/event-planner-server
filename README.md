@@ -3,7 +3,7 @@
 
 ## 📝 Overview
 
-Evenzo Backend is a RESTful API service built with Node.js, Express, and Prisma ORM that powers the Evenzo Event Planning & Participation System. This API handles authentication, event management, participant control, and payment processing via SSLCommerz integration.
+Evenzo Backend is a RESTful API service built with Node.js, Express, and Prisma ORM that powers the Evenzo Event Planning & Participation System. This API handles authentication, event management, participant control, and payment processing via Shurjopay integration.
 
 ## 🚀 Live API
 
@@ -32,7 +32,7 @@ Evenzo Backend is a RESTful API service built with Node.js, Express, and Prisma 
   - Participant approval workflow
   
 - **Payment Integration**
-  - SSLCommerz payment gateway integration
+  - Shurjopay payment gateway integration
   - Payment verification and status tracking
   
 - **Security**
@@ -47,7 +47,7 @@ Evenzo Backend is a RESTful API service built with Node.js, Express, and Prisma 
 - **Database:** PostgreSQL on Supabase
 - **ORM:** Prisma
 - **Authentication:** JWT
-- **Payment:** SSLCommerz
+- **Payment:** Shurjopay
 - **Validation:** Zod
 - **Deployment:** Vercel
 
@@ -55,7 +55,7 @@ Evenzo Backend is a RESTful API service built with Node.js, Express, and Prisma 
 
 - Node.js (version 18 or higher)
 - PostgreSQL database
-- SSLCommerz merchant account
+- Supabase account
 - npm or yarn
 
 ## 🛠️ Installation & Setup
@@ -97,14 +97,13 @@ JWT_EXPIRES_IN=7d
 REFRESH_TOKEN_SECRET=your_refresh_token_secret
 REFRESH_TOKEN_EXPIRES_IN=7d
 
-# SSLCommerz
-STORE_ID=your_sslcommerz_store_id
-STORE_PASS=your_sslcommerz_store_password
-SUCCESS_URL=your_success_url
-FAIL_URL=your_fail_url
-CANCEL_URL=your_cancel_url
-SSL_PAYMENT_API=https://sandbox.sslcommerz.com/gwprocess/v4/api.php
-SSL_VALIDATION_API=https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php
+# Shurjopay
+SP_ENDPOINT=https://sandbox.shurjopayment.com
+SP_USERNAME=sp_sandbox
+SP_PASSWORD=pyyk97hu&6u6
+SP_PREFIX=SP
+SP_RETURN_URL= <your_return_url>
+DB_FILE=./shurjopay-tx.db
 ```
 
 4. **Database Setup**
@@ -200,14 +199,14 @@ yarn build
 - `PUT /api/admin/events/:id` - Update event status (admin)
 - `DELETE /api/admin/users/:id` - Delete user (admin)
 
-## 💳 SSLCommerz Integration
+## 💳 Shurjopay Integration
 
-Evenzo uses SSLCommerz for processing payments:
+Evenzo uses Shurjopay for processing payments:
 
-1. When a user attempts to join a paid event, the API initiates a payment session with SSLCommerz
-2. User completes payment on the SSLCommerz gateway
-3. SSLCommerz redirects to success/failure endpoints
-4. Backend verifies transaction via IPN and validation API
+1. When a user attempts to join a paid event, the API initiates a payment session with Shurjopay
+2. User completes payment on the Shurjopay gateway
+3. Shurjopay redirects to success/failure endpoints
+4. Backend verifies transaction via validation API
 5. Upon successful verification, user's participation status is updated
 
 
@@ -236,7 +235,7 @@ The complete database schema is defined in `prisma/schema.prisma`.
 ## 🐞 Troubleshooting
 
 - **Database Connection Issues**: Verify DATABASE_URL in .env file
-- **Payment Gateway Errors**: Check SSLCommerz credentials and test mode settings
+- **Payment Gateway Errors**: Check Shurjopay credentials and test mode settings
 - **JWT Errors**: Ensure JWT_SECRET is properly set
 
 ## 🚀 Deployment
