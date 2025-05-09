@@ -152,11 +152,20 @@ const updateInvitationToDB = async (
           status: InvitationStatus.ACCEPTED,
         },
       });
-      //create a participant
-      const participant = await tx.participant.create({
-        data: {
+      //Update a participant
+      // const participant = await tx.participant.create({
+      //   data: {
+      //     eventId: isInvitationExists.eventId,
+      //     userId: isInvitationExists.participantId,
+      //     inviteId: isInvitationExists.id,
+      //   },
+      // });
+      const participant = await tx.participant.updateMany({
+        where: {
           eventId: isInvitationExists.eventId,
           userId: isInvitationExists.participantId,
+        },
+        data: {
           inviteId: isInvitationExists.id,
         },
       });

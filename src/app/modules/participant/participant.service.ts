@@ -65,58 +65,48 @@ const createParticipantIntoDB = async (
     };
   }
 
-  // Create Participant and Make payment Using Transaction
-  const PaymentResult = await prisma.$transaction(async (transactionClient) => {
-    // Create participant with status "PENDING"
-    const participant = await transactionClient.participant.create({
+  // Payment Payload
+  const orderPayload = {
+    amount: Math.ceil(isEventExists.fee),
+    order_id: isUserExists.id,
+    currency: "BDT",
+    customer_name: isUserExists.name,
+    customer_address: "NA",
+    customer_email: isUserExists?.email,
+    customer_phone: "NA",
+    customer_city: "NA",
+    client_ip,
+  };
+
+  //  Make Payment
+  const paymentResponse = await PaymentUtils.makePaymentAsync(orderPayload);
+  if (paymentResponse?.transactionStatus) {
+    await prisma.payment.create({
       data: {
-        ...data,
+        userId: isUserExists?.id,
+        amount: Math.ceil(isEventExists.fee),
+        eventId: isEventExists?.id,
         status: "PENDING",
-        hasPaid: true,
+        transactionId: paymentResponse?.sp_order_id,
       },
     });
-    // Payment Payload
-    const orderPayload = {
-      amount: Math.ceil(isEventExists.fee),
-      order_id: isUserExists.id,
-      currency: "BDT",
-      customer_name: isUserExists.name,
-      customer_address: "NA",
-      customer_email: isUserExists?.email,
-      customer_phone: "NA",
-      customer_city: "NA",
-      client_ip,
-    };
-
-    //  Make Payment
-    const paymentResponse = await PaymentUtils.makePaymentAsync(orderPayload);
-    if (paymentResponse?.transactionStatus) {
-      await transactionClient.payment.create({
-        data: {
-          userId: isUserExists?.id,
-          amount: Math.ceil(isEventExists.fee),
-          eventId: isEventExists?.id,
-          status: "PENDING",
-          transactionId: paymentResponse?.sp_order_id,
-        },
-      });
-    }
-
-    return paymentResponse?.checkout_url;
-  });
-
+  }
+  // Failed Success
   return {
     isPremium: true,
-    checkout_url: PaymentResult,
+    checkout_url: paymentResponse?.checkout_url,
   };
 };
 
-// Verify Payment
+//  Verify Payment
 const verifyPayment = async (orderId: string, userId: string) => {
   const verifiedPayment = await PaymentUtils.verifyPaymentAsync(orderId);
   // Update Payment Status
-  if (verifiedPayment?.length) {
-    await prisma.payment.update({
+  if (
+    verifiedPayment?.length &&
+    verifiedPayment[0]?.bank_status === "Success"
+  ) {
+    const updatedPayment = await prisma.payment.update({
       where: {
         transactionId: orderId,
         userId: userId,
@@ -126,7 +116,18 @@ const verifyPayment = async (orderId: string, userId: string) => {
         status: "SUCCESS",
       },
     });
+
+    // Create participant with status "PENDING"
+    await prisma.participant.create({
+      data: {
+        userId: updatedPayment?.userId,
+        eventId: updatedPayment?.eventId,
+        status: "PENDING",
+        hasPaid: true,
+      },
+    });
   }
+
   return verifiedPayment;
 };
 
@@ -134,6 +135,20 @@ const getAllParticipantsFromDB = async () => {
   return prisma.participant.findMany({
     where: {
       isDeleted: false,
+    },
+  });
+};
+
+// Get All Participants for Logged In User
+const getParticipantsForLoggedInUser = async (userId: string) => {
+  return prisma.participant.findMany({
+    where: {
+      userId,
+      isDeleted: false,
+    },
+    include: {
+      event: true,
+      user: true,
     },
   });
 };
@@ -191,6 +206,62 @@ const softDeleteParticipantFromDB = async (id: string) => {
   });
 };
 
+//  Refund Payment
+const refundPayment = async (payload: {
+  userId: string;
+  eventId: string;
+  participantId: string;
+}) => {
+  //  isExist User
+  const isExistUser = await prisma.user.findUniqueOrThrow({
+    where: {
+      id: payload.userId,
+    },
+  });
+  if (!isExistUser) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  }
+  //  isExist Event
+  const isExistEvent = await prisma.event.findUniqueOrThrow({
+    where: {
+      id: payload.eventId,
+    },
+  });
+  if (!isExistEvent) {
+    throw new AppError(httpStatus.NOT_FOUND, "Event not found");
+  }
+  // isExist Participant
+  const isExistParticipant = await prisma.participant.findUniqueOrThrow({
+    where: {
+      id: payload.participantId,
+    },
+  });
+  if (!isExistParticipant) {
+    throw new AppError(httpStatus.NOT_FOUND, "Participant not found");
+  }
+
+  //  Delete Event , Payment , Participant Using Transaction
+  const transaction = await prisma.$transaction(async (transactionClient) => {
+    //  Delete Participant
+    const participantDeleted = await transactionClient.participant.delete({
+      where: {
+        id: payload.participantId,
+        userId: payload.userId,
+        eventId: payload.eventId,
+      },
+    });
+    //  Delete Payment
+    await transactionClient.payment.deleteMany({
+      where: {
+        userId: payload.userId,
+        eventId: payload.eventId,
+      },
+    });
+    return participantDeleted;
+  });
+  return transaction;
+};
+
 export const ParticipantServices = {
   createParticipantIntoDB,
   getAllParticipantsFromDB,
@@ -199,4 +270,6 @@ export const ParticipantServices = {
   hardDeleteParticipantFromDB,
   softDeleteParticipantFromDB,
   verifyPayment,
+  getParticipantsForLoggedInUser,
+  refundPayment,
 };

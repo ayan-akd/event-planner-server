@@ -14,6 +14,13 @@ router.post(
   ParticipantControllers.createParticipant
 );
 
+// Refund
+router.post(
+  "/refund",
+  auth(UserRole.ADMIN, UserRole.USER),
+  ParticipantControllers.hardDeleteParticipantAndPaymentHistory
+);
+
 // Verify Payment
 router.get(
   "/verify",
@@ -25,6 +32,13 @@ router.get(
   "/",
   auth(UserRole.USER, UserRole.ADMIN),
   ParticipantControllers.getAllParticipants
+);
+
+// Get All Participants for Logged In User
+router.get(
+  "/my-participants",
+  auth(UserRole.USER, UserRole.ADMIN),
+  ParticipantControllers.getParticipantsForLoggedInUser
 );
 
 router.get(

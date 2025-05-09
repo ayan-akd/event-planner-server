@@ -50,6 +50,21 @@ const getAllParticipants = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// Get All Participants for Logged In User
+const getParticipantsForLoggedInUser = catchAsync(
+  async (req: Request & { user?: TUserFromToken }, res: Response) => {
+    const result = await ParticipantServices.getParticipantsForLoggedInUser(
+      req.user?.userId as string
+    );
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Participants fetched successfully",
+      data: result,
+    });
+  }
+);
+
 const getSingleParticipant = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const result = await ParticipantServices.getSingleParticipantFromDB(id);
@@ -101,6 +116,19 @@ const deleteWithUpdateParticipant = catchAsync(
   }
 );
 
+// Hard Delete Participant and Payment History
+const hardDeleteParticipantAndPaymentHistory = catchAsync(
+  async (req: Request, res: Response) => {
+    await ParticipantServices.refundPayment(req.body);
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Refund Request Send successfully",
+      data: null,
+    });
+  }
+);
+
 export const ParticipantControllers = {
   createParticipant,
   getAllParticipants,
@@ -109,4 +137,6 @@ export const ParticipantControllers = {
   deleteParticipant,
   deleteWithUpdateParticipant,
   ParticipantPaymentVerify,
+  getParticipantsForLoggedInUser,
+  hardDeleteParticipantAndPaymentHistory,
 };
