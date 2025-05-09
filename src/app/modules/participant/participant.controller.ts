@@ -116,6 +116,19 @@ const deleteWithUpdateParticipant = catchAsync(
   }
 );
 
+// Hard Delete Participant and Payment History
+const hardDeleteParticipantAndPaymentHistory = catchAsync(
+  async (req: Request, res: Response) => {
+    await ParticipantServices.refundPayment(req.body);
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Refund Request Send successfully",
+      data: null,
+    });
+  }
+);
+
 export const ParticipantControllers = {
   createParticipant,
   getAllParticipants,
@@ -125,4 +138,5 @@ export const ParticipantControllers = {
   deleteWithUpdateParticipant,
   ParticipantPaymentVerify,
   getParticipantsForLoggedInUser,
+  hardDeleteParticipantAndPaymentHistory,
 };

@@ -206,6 +206,62 @@ const softDeleteParticipantFromDB = async (id: string) => {
   });
 };
 
+//  Refund Payment
+const refundPayment = async (payload: {
+  userId: string;
+  eventId: string;
+  participantId: string;
+}) => {
+  //  isExist User
+  const isExistUser = await prisma.user.findUniqueOrThrow({
+    where: {
+      id: payload.userId,
+    },
+  });
+  if (!isExistUser) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  }
+  //  isExist Event
+  const isExistEvent = await prisma.event.findUniqueOrThrow({
+    where: {
+      id: payload.eventId,
+    },
+  });
+  if (!isExistEvent) {
+    throw new AppError(httpStatus.NOT_FOUND, "Event not found");
+  }
+  // isExist Participant
+  const isExistParticipant = await prisma.participant.findUniqueOrThrow({
+    where: {
+      id: payload.participantId,
+    },
+  });
+  if (!isExistParticipant) {
+    throw new AppError(httpStatus.NOT_FOUND, "Participant not found");
+  }
+
+  //  Delete Event , Payment , Participant Using Transaction
+  const transaction = await prisma.$transaction(async (transactionClient) => {
+    //  Delete Participant
+    const participantDeleted = await transactionClient.participant.delete({
+      where: {
+        id: payload.participantId,
+        userId: payload.userId,
+        eventId: payload.eventId,
+      },
+    });
+    //  Delete Payment
+    await transactionClient.payment.deleteMany({
+      where: {
+        userId: payload.userId,
+        eventId: payload.eventId,
+      },
+    });
+    return participantDeleted;
+  });
+  return transaction;
+};
+
 export const ParticipantServices = {
   createParticipantIntoDB,
   getAllParticipantsFromDB,
@@ -215,4 +271,5 @@ export const ParticipantServices = {
   softDeleteParticipantFromDB,
   verifyPayment,
   getParticipantsForLoggedInUser,
+  refundPayment,
 };
